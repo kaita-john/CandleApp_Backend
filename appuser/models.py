@@ -4,13 +4,12 @@ from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin, Group
 from django.db import models
-from django.db.models import DO_NOTHING
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 from appuser.managers import CustomUserManager
-from school.models import School
+from constants import GENDER_CHOICES
 from utils import BaseUserModel
 
 
@@ -27,18 +26,24 @@ class AppUser(BaseUserModel, AbstractBaseUser, PermissionsMixin):
     is_agent = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_celeb = models.BooleanField(default=True)
+
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
-    is_active = models.BooleanField(default=True)
-
     username = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255, blank=True, null=True)
     confirmpassword = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
-    school_id = models.ForeignKey(School, on_delete=DO_NOTHING, related_name="school_id", null=True)
+    gender = models.CharField(max_length=6,choices=GENDER_CHOICES,default='MALE')
     location = models.CharField(max_length=255, blank=True, null=True)
     roles = models.ManyToManyField(Group, related_name='users', blank=True)
+
+    tagline = models.CharField(max_length=255, blank=True, null=True, default = "")
+    biotext = models.CharField(max_length=255, blank=True, null=True, default = "User Bio")
+    stagename = models.CharField(max_length=255, blank=True, null=True, default = "")
+    image = models.CharField(max_length=255, blank=True, null=True, default = "")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -55,20 +60,18 @@ class AppUser(BaseUserModel, AbstractBaseUser, PermissionsMixin):
         return True
 
     def save(self, *args, **kwargs):
+        is_celeb = kwargs.pop("is_celeb", None)
         super().save(*args, **kwargs)
 
-        if self.first_name:
-            self.first_name = self.first_name.upper()
-        if self.last_name:
-            self.last_name = self.last_name.upper()
-
-        if self.is_superuser:
-            admin_group, admin_created = Group.objects.get_or_create(name='ADMIN')
-            superuser_group, created = Group.objects.get_or_create(name='SUPERUSER')
-            self.roles.add(superuser_group)
+        if is_celeb:
+            celeb_group = Group.objects.get_or_create(name="CELEB")
+            self.roles.add(celeb_group)
+            self.groups.add(celeb_group)
+            self.save()
 
     class Meta:
         ordering = ["-date_created"]
+
 
 
 
