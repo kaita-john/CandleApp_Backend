@@ -133,25 +133,25 @@ WSGI_APPLICATION = 'starpal.wsgi.application'
 # }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'bongadb',
-#         'USER': 'starpal',
-#         'PASSWORD': 'Login2aws',
-#         'HOST': 'database-1.c8bqhdkr5dbp.us-east-1.rds.amazonaws.com',
-#         'PORT': '5432',
-#     }
-# }
-
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'defaultdb',
+        'USER': 'doadmin',
+        'PASSWORD': 'AVNS_NOm4OwY7BMWDqSBfmdL',
+        'HOST': 'starpal-do-user-18732197-0.j.db.ondigitalocean.com',
+        'PORT': '25060',
     }
 }
+
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 # DATABASES = {
