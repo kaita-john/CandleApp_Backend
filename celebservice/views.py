@@ -37,7 +37,7 @@ class CelebServiceCreateView(SchoolIdMixin, generics.CreateAPIView):
 
 class CelebServiceListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
     serializer_class = CelebServiceSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = CelebService.objects.all()
