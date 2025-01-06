@@ -57,7 +57,7 @@ class AppUserCreateView(generics.CreateAPIView):
 
 class AppUserListView(SchoolIdMixin, generics.ListAPIView):
     serializer_class = AppUserSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     pagination_class = None  # Disable pagination for this view
 
     def get_queryset(self):
