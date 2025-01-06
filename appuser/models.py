@@ -41,7 +41,7 @@ class AppUser(BaseUserModel, AbstractBaseUser, PermissionsMixin):
     roles = models.ManyToManyField(Group, related_name='users', blank=True)
 
     tagline = models.CharField(max_length=255, blank=True, null=True, default = "")
-    biotext = models.CharField(max_length=255, blank=True, null=True, default = "User Bio")
+    biotext = models.CharField(max_length=255, blank=True, null=True, default = "")
     stagename = models.CharField(max_length=255, blank=True, null=True, default = "")
     image = models.CharField(max_length=255, blank=True, null=True, default = "")
 
@@ -64,10 +64,11 @@ class AppUser(BaseUserModel, AbstractBaseUser, PermissionsMixin):
         super().save(*args, **kwargs)
 
         if is_celeb:
+            print(f"It is a celebrity")
             celeb_group = Group.objects.get_or_create(name="CELEB")
             self.roles.add(celeb_group)
             self.groups.add(celeb_group)
-            self.save()
+            super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["-date_created"]
