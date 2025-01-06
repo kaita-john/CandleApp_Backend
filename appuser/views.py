@@ -1,5 +1,4 @@
 import requests
-from django.conf import settings
 from django.contrib.auth.models import Group
 from django.http import JsonResponse
 from rest_framework import generics, status
@@ -43,6 +42,7 @@ class AppUserCreateView(generics.CreateAPIView):
             is_celeb = serializer.validated_data.get("is_celeb", False)
             if is_celeb:
                 print(f"It is a celebrity")
+                user.is_active = False
                 celeb_group, created = Group.objects.get_or_create(name="CELEB")  # Get or create CELEB group
                 user.roles.add(celeb_group)
                 user.groups.add(celeb_group)
@@ -65,7 +65,7 @@ class AppUserListView(SchoolIdMixin, generics.ListAPIView):
         role_name = self.request.query_params.get('role_name')  # Get the 'role_name' from query parameters
         if role_name:
             print("AM HERE")
-            queryset = queryset.filter(groups__name=role_name)  # Filter by the role name
+            queryset = queryset.filter(groups__name=role_name, is_active = True)  # Filter by the role name
         else:
             print("AM NOT HERE")
         return queryset
