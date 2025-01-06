@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.http import JsonResponse
 from rest_framework import generics, status
 from rest_framework import serializers
@@ -37,7 +38,17 @@ class AppUserCreateView(generics.CreateAPIView):
             print("Serializer is valid. Data:")
             print(serializer.validated_data)
             user = serializer.save()
+
+            # Check if the user is a celebrity and assign group
+            is_celeb = serializer.validated_data.get("is_celeb", False)
+            if is_celeb:
+                print(f"It is a celebrity")
+                celeb_group, created = Group.objects.get_or_create(name="CELEB")  # Get or create CELEB group
+                user.roles.add(celeb_group)
+                user.groups.add(celeb_group)
+                user.save()
             return user
+
         else:
             print("Serializer is not valid. Errors:")
             print(serializer.errors)
