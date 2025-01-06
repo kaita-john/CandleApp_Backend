@@ -1,16 +1,15 @@
 # Create your views here.
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-from rest_framework import generics, status
+from django.shortcuts import get_object_or_404
+from rest_framework import generics
+from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from appuser.models import AppUser
-from service.models import Service
-from utils import SchoolIdMixin, UUID_from_PrimaryKey, IsAdminOrSuperUser, DefaultMixin
-from .models import CelebService
+from utils import SchoolIdMixin, UUID_from_PrimaryKey, DefaultMixin
+from .models import CelebService, Service, AppUser
 from .serializers import CelebServiceSerializer
 
 
@@ -37,7 +36,8 @@ class CelebServiceCreateView(SchoolIdMixin, generics.CreateAPIView):
 
 class CelebServiceListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
     serializer_class = CelebServiceSerializer
-    #permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = CelebService.objects.all()
@@ -57,7 +57,7 @@ class CelebServiceListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
 class CelebServiceDetailView(SchoolIdMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = CelebService.objects.all()
     serializer_class = CelebServiceSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get_object(self):
         primarykey = self.kwargs['pk']
@@ -87,7 +87,6 @@ class CelebServiceDetailView(SchoolIdMixin, generics.RetrieveUpdateDestroyAPIVie
 
 
 class CelebServiceDeleteAllObjects(SchoolIdMixin, APIView):
-
     def delete(self, request, *args, **kwargs):
         deleted_count, _ = CelebService.objects.all().delete()
         return Response({'detail': f"{deleted_count} CelebService objects deleted successfully."},
@@ -96,12 +95,6 @@ class CelebServiceDeleteAllObjects(SchoolIdMixin, APIView):
 
 
 
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from .models import CelebService, Service, AppUser
 
 class CelebServiceUpdateOrCreate(APIView):
     def post(self, request, *args, **kwargs):
