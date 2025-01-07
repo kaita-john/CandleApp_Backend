@@ -245,10 +245,16 @@ class CustomerRequestsView(APIView):
             # Serialize the payments
             serializer = RequestSerializer(payments, many=True)
 
+
             # Calculate totals
-            total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(0.35)
-            total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(0.35)
-            total_withdrawable = total_paid - total_withdrawn
+            admin_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(0.35)
+            admin_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(0.35)
+            admin_total_withdrawable = admin_total_paid - admin_total_withdrawn
+
+            customer_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) - admin_total_paid
+            customer_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) - admin_total_withdrawn
+            customer_total_withdrawable = customer_total_paid - customer_total_withdrawn
+
 
             response_data = []
             for payment in serializer.data:
@@ -257,9 +263,9 @@ class CustomerRequestsView(APIView):
 
             # Append totals to the response
             totals = {
-                "total_paid": total_paid,
-                "total_withdrawn": total_withdrawn,
-                "total_withdrawable": total_withdrawable,
+                "total_paid": customer_total_paid,
+                "total_withdrawn": customer_total_withdrawn,
+                "total_withdrawable": customer_total_withdrawable,
             }
 
             return Response({
