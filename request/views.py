@@ -1,4 +1,6 @@
 # Create your views here.
+from decimal import Decimal
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
 from django.http import JsonResponse
@@ -244,14 +246,13 @@ class CustomerRequestsView(APIView):
             serializer = RequestSerializer(payments, many=True)
 
             # Calculate totals
-            total_paid = payments.aggregate(Sum('amount'))['amount__sum'] * 0.35 or 0
-            total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or 0) * 0.35
+            total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(0.35)
+            total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(0.35)
             total_withdrawable = total_paid - total_withdrawn
 
-            # Add withdraw_amount to each payment in the response
             response_data = []
             for payment in serializer.data:
-                payment["withdraw_amount"] = float(payment["amount"]) * 0.35
+                payment["withdraw_amount"] = float(Decimal(payment["amount"]) * Decimal(0.35))
                 response_data.append(payment)
 
             # Append totals to the response
