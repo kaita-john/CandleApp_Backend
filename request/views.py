@@ -244,8 +244,8 @@ class CustomerRequestsView(APIView):
             serializer = RequestSerializer(payments, many=True)
 
             # Calculate totals
-            total_paid = payments.aggregate(Sum('amount'))['amount__sum'] or 0
-            total_withdrawn = payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or 0
+            total_paid = payments.aggregate(Sum('amount'))['amount__sum'] * 0.35 or 0
+            total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or 0) * 0.35
             total_withdrawable = total_paid - total_withdrawn
 
             # Add withdraw_amount to each payment in the response
