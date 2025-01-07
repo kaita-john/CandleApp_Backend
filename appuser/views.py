@@ -185,7 +185,7 @@ class FeedbackView(generics.CreateAPIView):
 
             # Return a success response
             return Response(
-                {"message": "Thank you for your feedback!"},
+                {"details": "Thank you for your feedback!"},
                 status=status.HTTP_200_OK
             )
         except Exception as e:
