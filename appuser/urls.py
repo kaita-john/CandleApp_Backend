@@ -35,5 +35,6 @@ urlpatterns = [
     path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('list', AppUserListView.as_view(), name="appuser-list"),
     path('list/schoolusers', FineAppUserListView.as_view(), name="userdetails-list"),
+    path('feedback', FeedbackView.as_view(), name="feedback-create"),
     path('<str:pk>', AppUserDetailView.as_view(), name="appuser-detail"),
 ]

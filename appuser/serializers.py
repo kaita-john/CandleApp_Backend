@@ -48,3 +48,13 @@ class AppUserSerializer(serializers.ModelSerializer):
 class PushNotificationSerializer(serializers.Serializer):
     external_id = serializers.CharField(required=True)
     message = serializers.CharField(required=True)
+
+
+class FeedbackSerializer(serializers.Serializer):
+    feedback = serializers.CharField(required=True)
+    mobile = serializers.CharField(required=True)
+    userid = serializers.PrimaryKeyRelatedField(
+        queryset=AppUser.objects.all(),
+        required=True,
+        write_only=True
+    )

@@ -10,9 +10,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from appuser.models import AppUser
-from appuser.serializers import AppUserSerializer, PushNotificationSerializer
-from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID
-from utils import SchoolIdMixin, UUID_from_PrimaryKey
+from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer
+from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL
+from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail
 
 
 class AppUserCreateView(generics.CreateAPIView):
@@ -162,3 +162,38 @@ class SendPushNotificationView(generics.CreateAPIView):
             return {'error': response.text}
 
 
+class FeedbackView(generics.CreateAPIView):
+    serializer_class = FeedbackSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # Validate the request data using the serializer
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            # Extracting data from the serializer
+            feedback = serializer.validated_data['feedback']
+            mobile = serializer.validated_data['mobile']
+            userid = serializer.validated_data['userid']
+
+            # Create the feedback message
+            message = f"Feedback: {feedback}\nMobile: {mobile}\nUser ID: {userid}"
+
+            # Send the email (assumes sendMail is defined elsewhere)
+            sendMail(sender_email, sender_password, COMPANY_EMAIL, "FEEDBACK", message)
+
+            # Return a success response
+            return Response(
+                {"message": "Feedback submitted successfully."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            # Log the exception (replace with proper logging)
+            print(f"Error occurred: {e}")  # For debugging; use a logging library in production
+
+            # Return an error response
+            return Response(
+                {"error": "An error occurred while submitting feedback. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
