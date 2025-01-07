@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from appuser.models import AppUser
 from appuser.views import SendPushNotificationView
 from celebservice.models import CelebService
-from constants import sender_email, sender_password, token, publishable_key, COMPANYID, COMPANY_EMAIL
+from constants import sender_email, sender_password, token, publishable_key, COMPANYID, COMPANY_EMAIL, COMPANYAMOUNT
 from mpesainvoices.models import MpesaInvoice
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, IsAdminOrSuperUser, DefaultMixin, sendMail
 from .models import Request
@@ -247,8 +247,8 @@ class CustomerRequestsView(APIView):
 
 
             # Calculate totals
-            admin_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(0.35)
-            admin_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(0.35)
+            admin_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(COMPANYAMOUNT)
+            admin_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(COMPANYAMOUNT)
             admin_total_withdrawable = admin_total_paid - admin_total_withdrawn
 
             customer_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) - admin_total_paid
@@ -258,7 +258,7 @@ class CustomerRequestsView(APIView):
 
             response_data = []
             for payment in serializer.data:
-                payment["withdraw_amount"] = float(Decimal(payment["amount"])) -  (float(Decimal(payment["amount"]) * Decimal(0.35)))
+                payment["withdraw_amount"] = float(Decimal(payment["amount"])) -  (float(Decimal(payment["amount"]) * Decimal(COMPANYAMOUNT)))
                 response_data.append(payment)
 
             # Append totals to the response

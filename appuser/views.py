@@ -1,6 +1,8 @@
 import requests
 from django.contrib.auth.models import Group
 from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.cache import never_cache
 from rest_framework import generics, status
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
@@ -13,6 +15,66 @@ from appuser.models import AppUser
 from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer
 from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail
+
+from django.shortcuts import render, redirect
+from django.contrib import messages, auth
+from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.views.decorators.cache import never_cache
+from django.utils.translation import gettext as _
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
+from appuser.models import AppUser  # Import the custom user model
+
+from django.contrib.auth import authenticate
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
+from appuser.models import AppUser  # Import your custom user model
+
+
+@never_cache
+def deleteAccount(request):
+    if request.method == "POST":
+        try:
+            email = request.POST.get("email", "").strip()
+            password = request.POST.get("password", "").strip()
+
+            if not email or not password:
+                messages.error(request, _("Email address and password are required!"))
+                return redirect("deleteaccountpage")
+
+            try:
+                user = AppUser.objects.get(email=email)
+                if user.check_password(password):
+                    user.delete()
+                    messages.success(request, _("Your account has been deleted successfully."))
+                    return redirect("deleteaccountpage")
+                else:
+                    messages.error(request, _("Incorrect password. Please try again."))
+                    return redirect("deleteaccountpage")
+
+            except AppUser.DoesNotExist:
+                messages.error(request, _("No user found with that email address."))
+                return redirect("deleteaccountpage")
+            except Exception as deletion_exception:
+                messages.error(request, _(f"An error occurred while deleting the account: {deletion_exception}"))
+                return redirect("deleteaccountpage")
+
+        except Exception as exception:
+            messages.error(request, _(f"An unexpected error occurred: {exception}"))
+            return redirect("deleteaccountpage")
+
+    # Render the delete account form if GET request
+    return render(request, "login.html", {"summary": []})
 
 
 class AppUserCreateView(generics.CreateAPIView):

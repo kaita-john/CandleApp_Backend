@@ -29,6 +29,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 urlpatterns = [
     path('roles', RoleListView.as_view(), name="roles-list"),
+    path('delete-account', deleteAccount, name="deleteaccountpage"),
     path('notification', SendPushNotificationView.as_view(), name="roles-list"),
     path('register', AppUserCreateView.as_view(), name='register'),
     path('login', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
