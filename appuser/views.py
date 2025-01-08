@@ -77,6 +77,11 @@ def deleteAccount(request):
     return render(request, "login.html", {"summary": []})
 
 
+@never_cache
+def childSafety(request):
+    return render(request, "child-safety.html", {"summary": []})
+
+
 class AppUserCreateView(generics.CreateAPIView):
     serializer_class = AppUserSerializer
 
