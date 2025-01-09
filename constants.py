@@ -61,6 +61,8 @@ COMPLETED = 'COMPLETED'
 SCHEDULED = 'SCHEDULED'
 RESCHEDULED = 'RESCHEDULED'
 DONEREQUESTED = 'DONEREQUESTED'
+WITHDRAWREQUEST = 'WITHDRAWREQUEST'
+WITHDRAWN = 'WITHDRAWN'
 
 STATE_CHOICES = [
     (PENDING, 'Pending'),
@@ -69,12 +71,12 @@ STATE_CHOICES = [
     (RESCHEDULED, 'Rescheduled'),
     (SCHEDULED, 'Scheduled'),
     (DONEREQUESTED, 'Donerequested'),
+    (WITHDRAWREQUEST, 'Withdrawrequest'),
+    (WITHDRAWN, 'Withdrawn'),
 ]
-
 
 sender_email = "kaitaformal@gmail.com"
 sender_password ="wwmx vsyr tvwp sfac"
-
 
 token = "ISSecretKey_live_113a3e6d-e2ce-4342-ab6e-16014f6e416c"
 publishable_key = "ISPubKey_live_f27f98fc-a2c0-4e55-a035-5e4f8ed321c0"
@@ -84,4 +86,4 @@ ONESIGNAL_API_KEY = "os_v2_app_vpbipjazmbeqhc4pcsas5rxqortm4wnjkapeom5wgq5bf543z
 COMPANY_EMAIL = "starpalglobal@gmail.com"
 COMPANYID = "6ce52e71-588f-4be5-b9e2-506c681e16bf"
 
-COMPANYAMOUNT = 0.35
+COMPANYAMOUNT = 0.50

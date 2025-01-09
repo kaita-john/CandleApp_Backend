@@ -84,7 +84,7 @@
         id="accordionSidebar">
 
         <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'adminhomepage' %}">
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'homepage' %}">
             <div>Mr {{ summary.fullname }}</div>
         </a>
 
@@ -93,7 +93,7 @@
 
         <!-- Nav Item - Dashboard -->
         <li class="nav-item active">
-            <a class="nav-link" href="{% url 'adminhomepage' %}">
+            <a class="nav-link" href="{% url 'homepage' %}">
                 <i class="fas fa-fw fa-tachometer-alt"></i>
                 <span>Hi Admin!</span></a>
         </li>
@@ -103,51 +103,51 @@
 
         {% if summary.istheadmin %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'adminhomepage' %}">
+                <a class="nav-link" href="{% url 'homepage' %}">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Dashboard</span></a>
             </li>
 
         {% else %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'agenthomepageminusid' %}">
+                <a class="nav-link" href="{% url 'homepage' %}">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Dashboard</span></a>
             </li>
         {% endif %}
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'adminschoolpage' %}">
+            <a class="nav-link" href="{% url 'userspage' %}">
                 <i class="fas fa-fw fa-table"></i>
-                <span>Schools</span></a>
+                <span>Users</span></a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'admindevicepage' %}">
+            <a class="nav-link" href="{% url 'requestspage' %}">
                 <i class="fas fa-fw fa-table"></i>
-                <span>Devices</span></a>
+                <span>Requests</span></a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'admintokenspage' %}">
+        {% comment %}<li class="nav-item">
+            <a class="nav-link" href="{% url 'homepage' %}">
                 <i class="fas fa-fw fa-table"></i>
                 <span>Tokens</span></a>
-        </li>
+        </li>{% endcomment %}
 
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'adminagentspage' %}">
+        {% comment %}<li class="nav-item">
+            <a class="nav-link" href="{% url 'homepage' %}">
                 <i class="fas fa-fw fa-table"></i>
                 <span>Agents</span></a>
-        </li>
+        </li>{% endcomment %}
 
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'editGlobal' %}">
+        {% comment %}<li class="nav-item">
+            <a class="nav-link" href="{% url 'homepage' %}">
                 <i class="fas fa-fw fa-table"></i>
                 <span>Settings</span></a>
-        </li>
+        </li>{% endcomment %}
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'logout' %}">
+            <a class="nav-link" href="{% url 'homepage' %}">
                 <i class="fas fa-fw fa-table"></i>
                 <span>Logout</span></a>
         </li>

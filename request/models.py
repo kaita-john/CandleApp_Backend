@@ -10,6 +10,8 @@ from utils import sendMail
 
 class Request(ParentModel):
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    companyamount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    clientamount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     client = models.ForeignKey( AppUser, default=None, on_delete=models.CASCADE, related_name='payments_as_client')
     celeb = models.ForeignKey( AppUser, default=None, on_delete=models.CASCADE, related_name='payments_as_celeb')
     celebservice = models.ForeignKey( CelebService, default=None, on_delete=models.CASCADE, related_name='payments')

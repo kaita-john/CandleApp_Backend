@@ -1,0 +1,268 @@
+{% extends 'adminmenu.html' %}
+{% load static %}
+{% block body %}
+
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Users</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+        <style>
+            /* General Page Styling */
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f7fc;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 20px auto;
+                padding: 20px 10px; /* Adjusted padding */
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                text-align: center;
+                color: #333;
+            }
+
+            /* Filter Buttons */
+            .filter-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .search-input {
+                width: 40%;
+                padding: 12px;
+                margin-bottom: 10px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                font-size: 16px;
+                box-sizing: border-box;
+            }
+
+            .filter-buttons a {
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border-radius: 5px;
+                text-decoration: none;
+                font-weight: bold;
+                margin: 0 5px;
+                transition: background-color 0.3s ease;
+            }
+
+            .filter-buttons a:hover {
+                background-color: #0056b3;
+            }
+
+            /* Table Styling */
+            table {
+                width: 100%; /* Full width */
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+
+            th, td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            th {
+                background-color: #f8f9fa;
+                color: #333;
+                font-weight: bold;
+            }
+
+            td {
+                color: #555;
+            }
+
+            /* Table Row Hover */
+            tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            /* Dropdown Menu */
+            .dropdown-toggle {
+                background-color: #007bff;
+                color: white;
+                padding: 6px 12px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .dropdown-menu {
+                display: none;
+                position: absolute;
+                background-color: white;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .dropdown:hover .dropdown-menu {
+                display: block;
+            }
+
+            .dropdown-item {
+                padding: 10px;
+                color: #007bff;
+                text-decoration: none;
+                display: block;
+            }
+
+            .dropdown-item:hover {
+                background-color: #f1f1f1;
+            }
+
+        </style>
+
+    </head>
+    <body>
+    <div class="container">
+        <h2 style="color: black" align="center" id="texted">All Users</h2><br>
+
+        <!-- Search Bar and Filter Buttons -->
+        <div class="filter-container">
+            <input type="text" id="searchInput" placeholder="Search all users..." onkeyup="filterTable()"
+                   class="search-input">
+            <div class="filter-buttons">
+                <a href="#" class="btn" onclick="filterByRole('all')">All-Users {{ filter_counts.all }}</a>
+                <a href="#" class="btn" onclick="filterByRole('celeb')">Celebrities {{ filter_counts.celeb }}</a>
+                <a href="#" class="btn" onclick="filterByRole('client')">Clients {{ filter_counts.client }}</a>
+                <a href="#" class="btn" onclick="filterByRole('unapproved')">Unapproved Celebs {{ unapproved_celebs }}</a>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <table id="usersTable">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>StageName</th>
+                <th>Role</th>
+                <th>Bio</th>
+
+                <th>Options</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr data-role="{% if user.is_celeb %}celeb{% else %}client{% endif %}"
+                    data-approval="{% if user.is_admin %}unapproved{% else %}approved{% endif %}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{% if user.is_active %}Active{% else %}Inactive{% endif %}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>{{ user.gender }}</td>
+                    <td>{{ user.stagename }}</td>
+                    <td>
+                        {% if user.is_celeb %}
+                            Celeb
+                        {% else %}
+                            Client
+                        {% endif %}
+                    </td>
+                    <td>{{ user.biotext }}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="dropdown-toggle">Options</button>
+                            <div class="dropdown-menu">
+                                <a href="#" class="dropdown-item">Delete User</a>
+                                <a href="#" class="dropdown-item">Deactivate User</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="9">No users found.</td>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- JavaScript to Filter Table Rows -->
+    <script>
+
+
+        // Function to filter table rows based on the search input
+        function filterTable() {
+            document.getElementById('texted').textContent = "All Users";
+            const searchInput = document.getElementById("searchInput").value.toLowerCase();
+            const table = document.getElementById("usersTable");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const nameCell = row.cells[1].textContent.toLowerCase();
+                const emailCell = row.cells[2].textContent.toLowerCase();
+                const statusCell = row.cells[3].textContent.toLowerCase();
+
+                if (nameCell.includes(searchInput) || emailCell.includes(searchInput) || statusCell.includes(searchInput)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        }
+
+        function filterByRole(role) {
+            const table = document.getElementById("usersTable");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const userRole = row.getAttribute("data-role");
+                const userApproval = row.getAttribute("data-approval");
+
+                if (role === 'all') {
+                    row.style.display = "";
+                    document.getElementById('texted').textContent = "All Users";
+                }
+                else if (role === 'celeb' && userRole === 'celeb') {
+                    document.getElementById('texted').textContent = "All Celebrities";
+                    row.style.display = "";
+                } else if (role === 'client' && userRole === 'client') {
+                    document.getElementById('texted').textContent = "All Clients";
+                    row.style.display = "";
+                } else if (role === 'unapproved' && userApproval === 'unapproved') {
+                    document.getElementById('texted').textContent = "Unapproved Celebs";
+                    row.style.display = "";
+                } else if (role === 'all') {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+
+            }
+        }
+
+    </script>
+
+    </body>
+    </html>
+
+
+{% endblock %}

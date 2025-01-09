@@ -16,7 +16,8 @@ from rest_framework.views import APIView
 from appuser.models import AppUser
 from appuser.views import SendPushNotificationView
 from celebservice.models import CelebService
-from constants import sender_email, sender_password, token, publishable_key, COMPANYID, COMPANY_EMAIL, COMPANYAMOUNT
+from constants import sender_email, sender_password, token, publishable_key, COMPANYID, COMPANY_EMAIL, COMPANYAMOUNT, \
+    WITHDRAWREQUEST
 from mpesainvoices.models import MpesaInvoice
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, IsAdminOrSuperUser, DefaultMixin, sendMail
 from .models import Request
@@ -35,14 +36,19 @@ class RequestCreateView(SchoolIdMixin, generics.CreateAPIView):
             existing_payment = Request.objects.filter(invoice_id=invoice_id).first()
             if existing_payment:
                 return Response({"details": "Request with this invoice already exists."},status=status.HTTP_200_OK)
+
+            amount = Decimal(serializer.validated_data.get('amount'))
+            company_amount = amount * COMPANYAMOUNT
+            withdraw_amount = amount - company_amount
+
+            serializer.validated_data['companyamount'] = company_amount
+            serializer.validated_data['clientamount'] = withdraw_amount
+
             self.perform_create(serializer)
             return Response({"details": "Request created successfully."},status=status.HTTP_201_CREATED)
         else:
             # Return 400 response for invalid data
-            return Response(
-                {"details": serializer.errors},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"details": serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
@@ -287,6 +293,7 @@ class CustomerWithdraw(APIView):
             if payment.withdraw_request:
                 return Response({"message": "Withdrawal request already submitted."},status=status.HTTP_400_BAD_REQUEST)
             payment.withdraw_request = True
+            payment.state = WITHDRAWREQUEST
             payment.save()
 
             message = "We have received a withdrawal request from you and it is being processed right now. This should take no more than a few hours"
