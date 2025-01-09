@@ -20,8 +20,8 @@
 
             .container {
                 max-width: 1200px;
-                margin: 20px auto;
-                padding: 20px 10px; /* Adjusted padding */
+                margin: 0px auto;
+                padding: 10px 10px; /* Adjusted padding */
                 background-color: white;
                 border-radius: 8px;
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -132,23 +132,31 @@
     </head>
     <body>
     <div class="container">
-        <h2 style="color: black" align="center" id="texted">All Requests</h2>
-        <input type="text" id="searchInput" placeholder="Search all requests..." onkeyup="filterTable()"
-                   class="search-input">
-        <div class="filter-container">
 
-            <div class="filter-buttons">
-                <a href="#" class="btn" onclick="filterByRole('all')">All Requests {{ filter_counts.all }}</a>
-                <a href="#" class="btn" onclick="filterByRole('PENDING')">PENDING {{ filter_counts.PENDING }}</a>
-                <a href="#" class="btn" onclick="filterByRole('COMPLETED')">COMPLETED
-                    {{ filter_counts.COMPLETED }}</a>
-                <a href="#" class="btn" onclick="filterByRole('CANCELED')">CANCELED {{ filter_counts.CANCELED }}</a>
-                <a href="#" class="btn" onclick="filterByRole('WITHDRAW')">WITHDRAW
-                    REQUESTS {{ filter_counts.WITHDRAW }}</a>
-                <a href="#" class="btn" onclick="filterByRole('WITHDRAWN')">WITHDRAWN {{ filter_counts.WITHDRAWN }}</a>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+            <h4 style="color: black; margin: 0;" id="texted">All Requests</h4>
+            <div style="flex-grow: 1; max-width: 500px; margin-left: 10px;">
+                <input type="text" id="searchInput" placeholder="Search all requests..." onkeyup="filterTable()"
+                       class="search-input" style="width: 100%; padding: 5px;">
             </div>
-
         </div>
+
+
+        <div class="filter-container">
+            <div class="filter-buttons">
+                <a href="#" class="btn btn-sm" onclick="filterByRole('all')">All Requests {{ filter_counts.all }}</a>
+                <a href="#" class="btn btn-sm" onclick="filterByRole('PENDING')">Pending {{ filter_counts.PENDING }}</a>
+                <a href="#" class="btn btn-sm"
+                   onclick="filterByRole('COMPLETED')">Completed {{ filter_counts.COMPLETED }}</a>
+                <a href="#" class="btn btn-sm"
+                   onclick="filterByRole('CANCELED')">Canceled {{ filter_counts.CANCELED }}</a>
+                <a href="#" class="btn btn-sm" onclick="filterByRole('WITHDRAW')">Withdraw
+                    Requests {{ filter_counts.WITHDRAW }}</a>
+                <a href="#" class="btn btn-sm"
+                   onclick="filterByRole('WITHDRAWN')">Withdrawn {{ filter_counts.WITHDRAWN }}</a>
+            </div>
+        </div>
+
 
         <!-- Users Table -->
         <table id="requestsTable">
@@ -185,8 +193,15 @@
                         <div class="dropdown">
                             <button class="dropdown-toggle">Options</button>
                             <div class="dropdown-menu">
-                                <a href="#" class="dropdown-item">Delete User</a>
-                                <a href="#" class="dropdown-item">Deactivate User</a>
+                                {% if request.state == "WITHDRAWREQUEST" %}
+                                    <a href="{% url 'mark_paid' request.id %}" class="dropdown-item"
+                                       onclick="return confirm('Are you sure you want to mark this request as paid?')">Mark
+                                        Paid</a>
+                                {% endif %}
+                                {% if request.refund_request %}
+                                    <a href="{% url 'refund_request' request.id %}" class="dropdown-item"
+                                       onclick="return confirm('Are you sure you want to refund this request?')">Refund</a>
+                                {% endif %}
                             </div>
                         </div>
                     </td>

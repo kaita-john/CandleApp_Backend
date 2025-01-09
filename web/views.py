@@ -3,34 +3,40 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
-
 from appuser.models import AppUser
 from constants import COMPANYAMOUNT
 from request.models import Request
-
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 @never_cache
 def login_view(request):
-    print(f"Here")
     if request.method == "POST":
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "").strip()
         if not email or not password:
             messages.error(request, _("Username and password are required!"))
             return redirect("loginpage")
+
         user = authenticate(request, username=email, password=password)
         if user is not None:
-            login(request, user)
-            messages.success(request, _("Login successful!"))
-            return redirect("homepage")
+            if user.is_superuser:
+                login(request, user)
+                messages.success(request, _("Login successful!"))
+                return redirect("homepage")
+            else:
+                messages.error(request, _("You must be a superuser to access this page."))
+                return redirect("loginpage")
         else:
             messages.error(request, _("Invalid username or password. Please try again."))
             return redirect("loginpage")
-    return render(request, "loginadmin.html")
 
+    return render(request, "loginadmin.html")
 
 
 def users_view(request):
@@ -75,10 +81,10 @@ def homepage_view(request):
 
     # Fetch all users
     users = AppUser.objects.all()
-    total_users = users.objects.all().count()
+    total_users = users.count()
     total_clients = users.filter(is_celeb=False).count()
     total_celebs = users.filter(roles__name="CELEB", is_celeb=True).count()
-    unapproved_celebrities = users.filter(is_admin=True).count(),
+    unapproved_celebrities = users.filter(is_admin=True).count()
 
     # Requests metrics
     requests = Request.objects.all()
@@ -87,9 +93,10 @@ def homepage_view(request):
     withdrawal_requests = requests.filter(state="WITHDRAWREQUEST")
     withdrawn_requests = requests.filter(state="WITHDRAWN")
 
-    total_amount_transacted = withdrawn_requests.aggregate( total_transacted=Sum("amount"))["total_transacted"] or Decimal(0)
+    total_amount_transacted = requests.aggregate( total_transacted=Sum("amount"))["total_transacted"]
     total_paid_to_clients = withdrawn_requests.aggregate(total_withdrawn=Sum("clientamount"))["total_withdrawn"] or Decimal(0)
     total_paid_to_company = withdrawn_requests.aggregate(total_withdrawn=Sum("companyamount"))["total_withdrawn"] or Decimal(0)
+
 
     # Pass metrics to template
     context = {
@@ -107,3 +114,55 @@ def homepage_view(request):
     }
 
     return render(request, "adminindex.html", context)
+
+def delete_user(request, user_id):
+    user = get_object_or_404(AppUser, id=user_id)
+    user.delete()
+    messages.success(request, "User has been successfully deleted.")
+    return redirect('userspage')
+
+def deactivate_user(request, user_id):
+    user = get_object_or_404(AppUser, id=user_id)
+    user.is_active = False
+    user.save()
+    messages.success(request, "User has been successfully deactivated.")
+    return redirect('userspage')
+
+
+def approve_celeb(request, user_id):
+    user = get_object_or_404(AppUser, id=user_id)
+    if user.is_admin:
+        user.is_admin = False
+        user.save()
+        messages.success(request, "Celeb has been successfully approved.")
+    else:
+        messages.error(request, "This user is already approved or is not a celeb.")
+    return redirect('userspage')
+
+
+
+def mark_paid(request, request_id):
+    req = get_object_or_404(Request, id=request_id)
+    if req.state == 'WITHDRAWREQUEST' or req.withdraw_request:
+        req.state = 'WITHDRAWN'
+        req.withdrawn = True
+        req.withdrawn_date = timezone.now()
+        req.save()
+    return redirect('request_list')
+
+def refund_request(request, request_id):
+    req = get_object_or_404(Request, id=request_id)
+    if req.refund_Request:
+        req.refunded = True
+        req.refundedOn = timezone.now()
+        req.save()
+        messages.success(request, "Request refunded successfully.")
+    else:
+        messages.error(request, "Refund not allowed for this request.")
+    return redirect("requests_list")
+
+
+
+def custom_logout_view(request):
+    logout(request)
+    return redirect("homepage")  # Replace 'homepage' with your desired redirect URL

@@ -19,7 +19,7 @@
     <title>Admin {{ summary.fullname }}</title>
 
     <!-- Custom fonts for this template-->
-    <link rel="icon" href="{% static 'assets/logod.png' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'assets/logonew.jpg' %}" type="image/x-icon">
     <link href="{% static 'assets/admin/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
     <link
             href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
@@ -85,7 +85,7 @@
 
         <!-- Sidebar - Brand -->
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'homepage' %}">
-            <div>Mr {{ summary.fullname }}</div>
+            <div>StarPal</div>
         </a>
 
         <!-- Divider -->
@@ -93,10 +93,12 @@
 
         <!-- Nav Item - Dashboard -->
         <li class="nav-item active">
-            <a class="nav-link" href="{% url 'homepage' %}">
+            <a class="nav-link d-flex align-items-center" href="{% url 'homepage' %}">
                 <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>Hi Admin!</span></a>
+                <span>Hi Admin!</span>
+            </a>
         </li>
+
 
         <!-- Divider -->
         <hr class="sidebar-divider">
@@ -147,13 +149,13 @@
         </li>{% endcomment %}
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'homepage' %}">
+            <a class="nav-link" href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')">
                 <i class="fas fa-fw fa-table"></i>
-                <span>Logout</span></a>
+                <span>Logout</span>
+            </a>
         </li>
 
         <br>
-
         <!-- Sidebar Toggler (Sidebar) -->
         <div class="text-center d-none d-md-inline">
             <button class="rounded-circle border-0" id="sidebarToggle"></button>
