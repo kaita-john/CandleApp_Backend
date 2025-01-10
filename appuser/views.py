@@ -255,11 +255,13 @@ class PasswordUPdateView(generics.CreateAPIView):
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
 
+        print(f"{email}")
+
         try:
-            user = AppUser.objects.get(username=email)
+            user = AppUser.objects.get(email=email)
         except AppUser.DoesNotExist:
             return Response({"error": "No user found with the provided email."}, status=status.HTTP_404_NOT_FOUND)
 
         user.password = make_password(password)
         user.save()
-        return Response({"details": "Password updated successfully. Login with your new password"},status=status.HTTP_200_OK)
+        return Response({"details": "Password updated successfully. We have emailed you your new password!"},status=status.HTTP_200_OK)
