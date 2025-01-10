@@ -255,7 +255,7 @@ class PasswordUPdateView(generics.CreateAPIView):
         password = serializer.validated_data.get('password')
 
         try:
-            user = AppUser.objects.get(email=email)
+            user = AppUser.objects.get(username=email)
         except AppUser.DoesNotExist:
             return Response({"error": "No user found with the provided email."}, status=status.HTTP_404_NOT_FOUND)
 
