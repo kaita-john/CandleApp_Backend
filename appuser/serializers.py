@@ -58,4 +58,4 @@ class FeedbackSerializer(serializers.Serializer):
 
 
 class PasswordSerializer(serializers.Serializer):
-    password = CharField(max_length=128, write_only=True)
+    password = serializers.CharField(required=True)
