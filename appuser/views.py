@@ -256,7 +256,7 @@ class PasswordUPdateView(generics.CreateAPIView):
 
         try:
             user = AppUser.objects.get(email=email)
-        except User.DoesNotExist:
+        except AppUser.DoesNotExist:
             return Response({"error": "No user found with the provided email."}, status=status.HTTP_404_NOT_FOUND)
 
         user.password = make_password(password)
