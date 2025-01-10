@@ -1,9 +1,12 @@
 {% load static %}
-{% if message %}
-    <script>
-        alert('{{message}}')
-    </script>
+{% if messages %}
+    {% for message in messages %}
+        <script>
+            alert("{{ message }}")
+        </script>
+    {% endfor %}
 {% endif %}
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,18 +19,18 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Admin {{ summary.fullname }}</title>
+    <title>Admin Panel </title>
 
     <!-- Custom fonts for this template-->
-    <link rel="icon" href="{% static 'assets/logonew.jpg' %}" type="image/x-icon">
-    <link href="{% static 'assets/admin/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link rel="icon" href="{% static 'logonew.jpg' %}" type="image/x-icon">
+    <link href="{% static 'admin/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
     <link
             href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
             rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link href="{% static 'assets/admin/css/sb-admin-2.min.css' %}" rel="stylesheet">
-    <link href="{% static 'assets/admin/vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+    <link href="{% static 'admin/css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <link href="{% static 'admin/vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
 
 
     <style>
@@ -80,7 +83,10 @@
 <div id="wrapper">
 
     <!-- Sidebar -->
-    <ul style="background: {{ summary.color }}" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+    {#    <ul style="background: {{ summary.color }}" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"#}
+    {#        id="accordionSidebar">#}
+    <!-- Sidebar -->
+    <ul style="" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
         id="accordionSidebar">
 
         <!-- Sidebar - Brand -->
@@ -103,20 +109,12 @@
         <!-- Divider -->
         <hr class="sidebar-divider">
 
-        {% if summary.istheadmin %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'homepage' %}">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Dashboard</span></a>
-            </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'homepage' %}">
+                <i class="fas fa-fw fa-chart-area"></i>
+                <span>Dashboard</span></a>
+        </li>
 
-        {% else %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'homepage' %}">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Dashboard</span></a>
-            </li>
-        {% endif %}
 
         <li class="nav-item">
             <a class="nav-link" href="{% url 'userspage' %}">
@@ -190,7 +188,7 @@
     <!-- End of Page Wrapper -->
 
     <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="{% static 'assets/admin/#page-top' %}">
+    <a class="scroll-to-top rounded" href="{% static 'admin/#page-top' %}">
         <i class="fas fa-angle-up"></i>
     </a>
 
@@ -208,7 +206,7 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="{% static 'assets/admin/login.html' %}">Logout</a>
+                    <a class="btn btn-primary" href="{% url 'logout' %}">Logout</a>
                 </div>
             </div>
         </div>
@@ -216,29 +214,29 @@
 </div>
 
 <!-- Bootstrap core JavaScript-->
-<script src="{% static 'assets/admin/vendor/jquery/jquery.min.js' %}"></script>
-<script src="{% static 'assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'admin/vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'admin/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
 <!-- Core plugin JavaScript-->
-<script src="{% static 'assets/admin/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+<script src="{% static 'admin/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
 
 <!-- Custom scripts for all pages-->
-<script src="{% static 'assets/admin/js/sb-admin-2.min.js' %}"></script>
+<script src="{% static 'admin/js/sb-admin-2.min.js' %}"></script>
 
 <!-- Page level plugins -->
-<script src="{% static 'assets/admin/vendor/chart.js/Chart.min.js' %}"></script>
+<script src="{% static 'admin/vendor/chart.js/Chart.min.js' %}"></script>
 
 <!-- Page level custom scripts -->
-<script src="{% static 'assets/admin/js/demo/chart-area-demo.js' %}"></script>
-<script src="{% static 'assets/admin/js/demo/chart-pie-demo.js' %}"></script>
+<script src="{% static 'admin/js/demo/chart-area-demo.js' %}"></script>
+<script src="{% static 'admin/js/demo/chart-pie-demo.js' %}"></script>
 
 
 <!-- Page level plugins -->
-<script src="{% static 'assets/admin/vendor/datatables/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'assets/admin/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'admin/vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'admin/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
 
 <!-- Page level custom scripts -->
-<script src="{% static 'assets/admin/js/demo/datatables-demo.js' %}"></script>
+<script src="{% static 'admin/js/demo/datatables-demo.js' %}"></script>
 
 
 </body>

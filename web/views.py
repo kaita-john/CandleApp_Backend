@@ -165,4 +165,4 @@ def refund_request(request, request_id):
 
 def custom_logout_view(request):
     logout(request)
-    return redirect("homepage")  # Replace 'homepage' with your desired redirect URL
+    return redirect("loginpage")  # Replace 'homepage' with your desired redirect URL

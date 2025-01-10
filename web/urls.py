@@ -1,9 +1,8 @@
-from django.contrib.auth.views import LogoutView
 from django.urls import path
+
 import web.views as webviews
 
 urlpatterns = [
-    path('', webviews.login_view, name='loginpage'),
     path('homepage/', webviews.homepage_view, name='homepage'),
     path('users/', webviews.users_view, name='userspage'),
     path('delete_user/<path:user_id>/', webviews.delete_user, name='delete_user'),
@@ -13,4 +12,5 @@ urlpatterns = [
     path("requests/refund/<int:request_id>/", webviews.refund_request, name="refund_request"),
     path("logout/", webviews.custom_logout_view, name="logout"),
     path('requests/', webviews.requests_view, name='requestspage'),
+    path('', webviews.login_view, name='loginpage'),
 ]

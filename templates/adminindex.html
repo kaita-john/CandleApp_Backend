@@ -1,22 +1,15 @@
 {% extends 'adminmenu.html' %}
 {% load static %}
 {% block body %}
-
-    {% if message %}
-        <script>
-            alert('{{message}}')
-        </script>
-    {% endif %}
-
     <br>
     <!-- Begin Page Content -->
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h4 style=" font-weight: bold; color: #4e73df;" >DASHBOARD</h4>
-            <a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+            {% comment %}<a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
                 <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+            </a>{% endcomment %}
         </div>
 
         <!-- Dashboard Summary -->

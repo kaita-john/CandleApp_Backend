@@ -12,7 +12,6 @@ api_patterns = [
     path(api_version + 'celebservices/', include('celebservice.urls')),
     path(api_version + 'requests/', include('request.urls')),
     path(api_version + 'mpesainvoices/', include('mpesainvoices.urls')),
-
     path('accounts/', include('allauth.urls')),
     path('childsafety/', include('appuser.urls')),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
