@@ -1,8 +1,11 @@
 import requests
+from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
+from django.contrib.auth.models import User
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
 from rest_framework import generics, status
 from rest_framework import serializers
@@ -12,34 +15,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from appuser.models import AppUser
+from appuser.models import AppUser  # Import your custom user model
 from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer, PasswordSerializer
 from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail
-
-from django.shortcuts import render, redirect
-from django.contrib import messages, auth
-from django.utils.translation import gettext as _
-from django.views.decorators.cache import never_cache
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.views.decorators.cache import never_cache
-from django.utils.translation import gettext as _
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.views.decorators.cache import never_cache
-from appuser.models import AppUser  # Import the custom user model
-
-from django.contrib.auth import authenticate
-from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.utils.translation import gettext as _
-from django.views.decorators.cache import never_cache
-from appuser.models import AppUser  # Import your custom user model
 
 
 @never_cache
@@ -276,7 +255,7 @@ class PasswordUPdateView(generics.CreateAPIView):
         password = serializer.validated_data.get('password')
 
         try:
-            user = User.objects.get(email=email)
+            user = AppUser.objects.get(email=email)
         except User.DoesNotExist:
             return Response({"error": "No user found with the provided email."}, status=status.HTTP_404_NOT_FOUND)
 
