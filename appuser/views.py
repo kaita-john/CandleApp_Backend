@@ -260,6 +260,6 @@ class PasswordUPdateView(generics.CreateAPIView):
         except AppUser.DoesNotExist:
             return Response({"error": "No user found with the provided email."}, status=status.HTTP_404_NOT_FOUND)
 
-        user.set_password(password)
+        user.password = make_password(password)
         user.save()
         return Response({"details": "Password updated successfully. Login with your new password"},status=status.HTTP_200_OK)
