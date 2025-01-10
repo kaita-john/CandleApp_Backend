@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 MIXED = 'MIXED'
 GIRL = 'GIRL'
 BOY = 'BOY'
@@ -86,4 +88,4 @@ ONESIGNAL_API_KEY = "os_v2_app_vpbipjazmbeqhc4pcsas5rxqortm4wnjkapeom5wgq5bf543z
 COMPANY_EMAIL = "starpalglobal@gmail.com"
 COMPANYID = "6ce52e71-588f-4be5-b9e2-506c681e16bf"
 
-COMPANYAMOUNT = 0.50
+COMPANYAMOUNT = Decimal(0.50)
