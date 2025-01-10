@@ -19,7 +19,7 @@ from rest_framework.views import APIView
 from appuser.models import AppUser  # Import your custom user model
 from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer, PasswordSerializer
 from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL
-from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail
+from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail, generate_random_password
 
 
 @never_cache
@@ -253,15 +253,23 @@ class PasswordUPdateView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         email = serializer.validated_data.get('email')
-        password = serializer.validated_data.get('password')
-
-        print(f"{email}")
+        new_password = serializer.validated_data.get('password')
 
         try:
             user = AppUser.objects.get(email=email)
         except AppUser.DoesNotExist:
             return Response({"error": "No user found with the provided email."}, status=status.HTTP_404_NOT_FOUND)
 
-        user.password = make_password(password)
+        response = "Password updated successfully!"
+        if not new_password or new_password == "" or new_password == "null":
+            response = "Password updated successfully. We have emailed you your new password!"
+            new_password = generate_random_password(self)
+
+
+        user.password = make_password(new_password)
         user.save()
-        return Response({"details": "Password updated successfully. We have emailed you your new password!"},status=status.HTTP_200_OK)
+
+        message = f"Dear User, Your new password is {new_password}"
+        sendMail(sender_email, sender_password, email, "PASSWORD CHANGE", message)
+
+        return Response({"details": response},status=status.HTTP_200_OK)

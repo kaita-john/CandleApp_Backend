@@ -58,5 +58,5 @@ class FeedbackSerializer(serializers.Serializer):
 
 
 class PasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(required=True)
+    password = serializers.CharField(required=False, allow_blank=True)
     email = serializers.CharField(required=True)
