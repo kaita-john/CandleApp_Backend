@@ -1,4 +1,5 @@
 import requests
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -12,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from appuser.models import AppUser
-from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer
+from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer, PasswordSerializer
 from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail
 
@@ -132,7 +133,7 @@ class AppUserListView(SchoolIdMixin, generics.ListAPIView):
         role_name = self.request.query_params.get('role_name')  # Get the 'role_name' from query parameters
         if role_name:
             print("AM HERE")
-            queryset = queryset.filter(groups__name=role_name, is_admin = False)  # Filter by the role name
+            queryset = queryset.filter(groups__name=role_name, is_admin=False)  # Filter by the role name
         else:
             print("AM NOT HERE")
         return queryset
@@ -193,7 +194,6 @@ class RoleListView(APIView):
         roles = user.roles.all() if user else []
         role_data = [{'name': role.name, 'id': role.id} for role in roles]
         return Response(role_data)
-
 
 
 class SendPushNotificationView(generics.CreateAPIView):
@@ -264,3 +264,22 @@ class FeedbackView(generics.CreateAPIView):
                 {"error": "An error occurred while submitting feedback. Please try again later."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class PasswordUPdateView(generics.CreateAPIView):
+    serializer_class = PasswordSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "No user found with the provided email."}, status=status.HTTP_404_NOT_FOUND)
+
+        user.password = make_password(password)
+        user.save()
+        return Response({"message": "Password updated successfully. Login with your new password"},status=status.HTTP_200_OK)

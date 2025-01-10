@@ -45,7 +45,7 @@ class RequestCreateView(SchoolIdMixin, generics.CreateAPIView):
             serializer.validated_data['clientamount'] = withdraw_amount
 
             self.perform_create(serializer)
-            return Response({"details": "Request created successfully."},status=status.HTTP_201_CREATED)
+            return Response({"details": "Hurray! You can now get in touch anytime. Simply open Requests Page and tap this request anytime you are ready."},status=status.HTTP_201_CREATED)
         else:
             # Return 400 response for invalid data
             return Response({"details": serializer.errors},status=status.HTTP_400_BAD_REQUEST)

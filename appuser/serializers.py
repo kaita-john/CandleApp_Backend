@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group
+from django.forms import CharField
 from rest_framework import serializers
 
 from appuser.models import AppUser
@@ -54,3 +55,7 @@ class FeedbackSerializer(serializers.Serializer):
     feedback = serializers.CharField(required=True)
     mobile = serializers.CharField(required=True)
     userid = serializers.CharField(required=True)
+
+
+class PasswordSerializer(serializers.Serializer):
+    password = CharField(max_length=128, write_only=True)

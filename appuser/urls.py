@@ -34,6 +34,7 @@ urlpatterns = [
     path('notification', SendPushNotificationView.as_view(), name="roles-list"),
     path('register', AppUserCreateView.as_view(), name='register'),
     path('login', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('reset-password', PasswordUPdateView.as_view(), name='reset-password'),
     path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('list', AppUserListView.as_view(), name="appuser-list"),
     path('list/schoolusers', FineAppUserListView.as_view(), name="userdetails-list"),
