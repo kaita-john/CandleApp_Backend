@@ -236,10 +236,9 @@ class CheckRequestStatus(APIView, DefaultMixin, SchoolIdMixin):
 
 class CustomerRequestsView(APIView):
     def get(self, request, customer_id=None, celeb_id=None):
-        global payments
         try:
             #payments = Request.objects.filter(state="COMPLETE").order_by('withdrawn')
-            #payments = Request.objects.filter().order_by('withdrawn')
+            payments = Request.objects.filter().order_by('withdrawn')
 
             # Filter payments for the provided customer ID
             if customer_id and customer_id != "null" and customer_id != "":
@@ -247,7 +246,7 @@ class CustomerRequestsView(APIView):
 
             # Filter payments for the provided customer ID
             if celeb_id and celeb_id != "null" and celeb_id != "":
-                payments = Request.objects.filter(celeb__id=celeb_id, complete_requested_by_celeb=True).order_by('withdrawn')
+                payments = Request.objects.filter(celeb__id=celeb_id, complete_requested_by_celeb="COMPLETED").order_by('withdrawn')
 
             # Serialize the payments
             serializer = RequestSerializer(payments, many=True)
