@@ -69,9 +69,9 @@ WITHDRAWN = 'WITHDRAWN'
 STATE_CHOICES = [
     (PENDING, 'Pending'),
     (CANCELED, 'Canceled'),
-    (COMPLETED, 'Completed'),
     (RESCHEDULED, 'Rescheduled'),
     (SCHEDULED, 'Scheduled'),
+    (COMPLETED, 'Completed'),
     (DONEREQUESTED, 'Donerequested'),
     (WITHDRAWREQUEST, 'Withdrawrequest'),
     (WITHDRAWN, 'Withdrawn'),

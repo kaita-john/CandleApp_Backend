@@ -242,11 +242,11 @@ class CustomerRequestsView(APIView):
 
             # Filter payments for the provided customer ID
             if customer_id and customer_id != "null" and customer_id != "":
-                payments = Request.objects.filter(client__id=customer_id, state="COMPLETE").order_by('withdrawn')
+                payments = Request.objects.filter(client__id=customer_id, complete_requested_by_celeb=True).order_by('withdrawn')
 
             # Filter payments for the provided customer ID
             if celeb_id and celeb_id != "null" and celeb_id != "":
-                payments = Request.objects.filter(celeb__id=celeb_id, state="COMPLETE").order_by('withdrawn')
+                payments = Request.objects.filter(celeb__id=celeb_id, complete_requested_by_celeb=True).order_by('withdrawn')
 
             # Serialize the payments
             serializer = RequestSerializer(payments, many=True)
