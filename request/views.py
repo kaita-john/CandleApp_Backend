@@ -237,22 +237,17 @@ class CheckRequestStatus(APIView, DefaultMixin, SchoolIdMixin):
 class CustomerRequestsView(APIView):
     def get(self, request, customer_id=None, celeb_id=None):
         try:
-            #payments = Request.objects.filter(state="COMPLETE").order_by('withdrawn')
-            payments = Request.objects.filter().order_by('withdrawn')
+            # Start with a base query
+            payments = Request.objects.filter(complete_requested_by_celeb=True).order_by('withdrawn')
 
-            # Filter payments for the provided customer ID
             if customer_id and customer_id != "null" and customer_id != "":
-                payments = Request.objects.filter(client__id=customer_id, complete_requested_by_celeb=True).order_by('withdrawn')
+                payments = payments.filter(client__id=customer_id)
 
-            # Filter payments for the provided customer ID
             if celeb_id and celeb_id != "null" and celeb_id != "":
-                payments = Request.objects.filter(celeb__id=celeb_id, complete_requested_by_celeb="COMPLETED").order_by('withdrawn')
+                payments = payments.filter(celeb__id=celeb_id)
 
-            # Serialize the payments
             serializer = RequestSerializer(payments, many=True)
 
-
-            # Calculate totals
             admin_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(COMPANYAMOUNT)
             admin_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(COMPANYAMOUNT)
             admin_total_withdrawable = admin_total_paid - admin_total_withdrawn
@@ -261,10 +256,9 @@ class CustomerRequestsView(APIView):
             customer_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) - admin_total_withdrawn
             customer_total_withdrawable = customer_total_paid - customer_total_withdrawn
 
-
             response_data = []
             for payment in serializer.data:
-                payment["withdraw_amount"] = float(Decimal(payment["amount"])) -  (float(Decimal(payment["amount"]) * Decimal(COMPANYAMOUNT)))
+                payment["withdraw_amount"] = float(Decimal(payment["amount"])) - (float(Decimal(payment["amount"]) * Decimal(COMPANYAMOUNT)))
                 response_data.append(payment)
 
             # Append totals to the response
@@ -281,6 +275,7 @@ class CustomerRequestsView(APIView):
 
         except Request.DoesNotExist:
             return Response({"error": "Request not found for the given customer ID."}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 
