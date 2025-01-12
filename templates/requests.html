@@ -150,7 +150,8 @@
                    onclick="filterByRole('COMPLETED')">Completed {{ filter_counts.COMPLETED }}</a>
                 <a href="#" class="btn btn-sm"
                    onclick="filterByRole('CANCELED')">Canceled {{ filter_counts.CANCELED }}</a>
-                <a href="#" class="btn btn-sm" onclick="filterByRole('WITHDRAW')">Withdraw
+                <a href="#" class="btn btn-sm"
+                   onclick="filterByRole('ATM')">Withdraw
                     Requests {{ filter_counts.WITHDRAW }}</a>
                 <a href="#" class="btn btn-sm"
                    onclick="filterByRole('WITHDRAWN')">Withdrawn {{ filter_counts.WITHDRAWN }}</a>
@@ -176,12 +177,13 @@
             </tr>
             </thead>
             <tbody>
+
             {% for request in requests %}
                 <tr data-state="{{ request.state }}"
                     data-withdrawrequest="{{ request.withdraw_request }}">
-                    <td>{{ forloop.counter }}</td>
+                    <td>{{ request.withdraw_request }}</td>
                     <td>{{ request.auto_date }}</td>
-                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                    <td>{{ request.client.first_name }} {{ request.client.last_name }}</td>
                     <td>{{ request.celeb.stagename }}</td>
                     <td>{{ request.celebservice.serviceid.name }}</td>
                     <td>{{ request.state }}</td>
@@ -193,12 +195,12 @@
                         <div class="dropdown">
                             <button class="dropdown-toggle">Options</button>
                             <div class="dropdown-menu">
-                                {% if request.state == "WITHDRAWREQUEST" %}
+                                {% if request.withdraw_request and request.state != 'WITHDRAWN' %}
                                     <a href="{% url 'mark_paid' request.id %}" class="dropdown-item"
                                        onclick="return confirm('Are you sure you want to mark this request as paid?')">Mark
                                         Paid</a>
                                 {% endif %}
-                                {% if request.refund_request %}
+                                {% if request.refund_Request and request.refunded != True %}
                                     <a href="{% url 'refund_request' request.id %}" class="dropdown-item"
                                        onclick="return confirm('Are you sure you want to refund this request?')">Refund</a>
                                 {% endif %}
@@ -247,29 +249,38 @@
             const rows = table.getElementsByTagName("tr");
 
             for (let i = 1; i < rows.length; i++) {
+
                 const row = rows[i];
                 const state = row.getAttribute("data-state");
                 const data_withdrawrequest = row.getAttribute("data-withdrawrequest");
 
+
                 if (role === 'all') {
+                    console.log("3")
                     row.style.display = "";
                     document.getElementById('texted').textContent = "All Requests";
                 } else if (role === 'PENDING' && state === 'PENDING') {
+                    console.log("4")
                     document.getElementById('texted').textContent = "Pending Requests";
                     row.style.display = "";
                 } else if (role === 'COMPLETED' && state === 'COMPLETED') {
+                    console.log("5")
                     document.getElementById('texted').textContent = "Completed Requests";
                     row.style.display = "";
                 } else if (role === 'CANCELED' && state === 'CANCELED') {
+                    console.log("6")
                     document.getElementById('texted').textContent = "Canceled Requests";
                     row.style.display = "";
-                } else if (role === 'WITHDRAW' && data_withdrawrequest === true && state === "WITHDRAW_REQUEST") {
+                } else if (role === 'ATM' && data_withdrawrequest === "True" && state !== "WITHDRAWN") {
+                    console.log("7")
                     document.getElementById('texted').textContent = "Withdrawal Requests";
                     row.style.display = "";
                 } else if (role === 'WITHDRAWN' && state === "WITHDRAWN") {
+                    console.log("8")
                     document.getElementById('texted').textContent = "Withdrawn Requests";
                     row.style.display = "";
                 } else {
+                    console.log("9")
                     row.style.display = "none";
                 }
 

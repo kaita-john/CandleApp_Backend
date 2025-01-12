@@ -2,17 +2,19 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
+from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
+
 from appuser.models import AppUser
 from constants import COMPANYAMOUNT
 from request.models import Request
-from django.contrib.auth import logout
-from django.shortcuts import redirect
+
 
 @never_cache
 def login_view(request):
@@ -65,7 +67,7 @@ def requests_view(request):
         "COMPLETED": requests.filter(state="COMPLETED").count(),
         "CANCELED": requests.filter(state="CANCELED").count(),
         "WITHDRAWN": requests.filter(state ="WITHDRAWN").count(),
-        "WITHDRAW": requests.filter(withdraw_request=True, state = "WITHDRAWREQUEST").count(),
+        "WITHDRAW": requests.filter(withdraw_request=True).exclude(state="WITHDRAWN").count(),
     }
 
     for req in requests:
@@ -143,12 +145,12 @@ def approve_celeb(request, user_id):
 
 def mark_paid(request, request_id):
     req = get_object_or_404(Request, id=request_id)
-    if req.state == 'WITHDRAWREQUEST' or req.withdraw_request:
-        req.state = 'WITHDRAWN'
-        req.withdrawn = True
-        req.withdrawn_date = timezone.now()
-        req.save()
-    return redirect('request_list')
+    req.complete_requested_by_celeb = False
+    req.state = 'WITHDRAWN'
+    req.withdrawn = True
+    req.withdrawn_date = timezone.now()
+    req.save()
+    return redirect('requestspage')
 
 def refund_request(request, request_id):
     req = get_object_or_404(Request, id=request_id)
@@ -159,7 +161,7 @@ def refund_request(request, request_id):
         messages.success(request, "Request refunded successfully.")
     else:
         messages.error(request, "Refund not allowed for this request.")
-    return redirect("requests_list")
+    return redirect("requestspage")
 
 
 
