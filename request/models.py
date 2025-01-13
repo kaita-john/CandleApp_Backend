@@ -57,12 +57,12 @@ class Request(ParentModel):
             sendMail(sender_email, sender_password, self.celeb.email, "REFUND REQUEST", message)
             sendMail(sender_email, sender_password, COMPANY_EMAIL, "REFUND REQUEST", message)
 
-        if self.state != "WITHDRAWN" and self.complete_requested_by_celeb:
+        if self.state != "WITHDRAWN" and self.state != "WITHDRAWREQUEST" and self.complete_requested_by_celeb:
             self.state = "COMPLETED"
 
-        if self.state != "WITHDRAWN" and not self.shoutout_video and self.shoutout_video != "":
+        if self.state != "WITHDRAWN" and self.shoutout_video and self.shoutout_video != "" and self.celebservice.serviceid.name == "SHOUTOUT":
             self.is_shout_out_video_recorded = True
-            self.state = "COMPLETED"
+
 
         super().save(*args, **kwargs)
 
