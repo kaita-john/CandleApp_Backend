@@ -258,7 +258,7 @@ class CustomerRequestsView(APIView):
 
             response_data = []
             for payment in serializer.data:
-                payment["withdraw_amount"] = float(Decimal(payment["amount"])) - (float(Decimal(payment["amount"]) * Decimal(COMPANYAMOUNT)))
+                payment["withdraw_amount"] = payment.clientamount
                 response_data.append(payment)
 
             # Append totals to the response

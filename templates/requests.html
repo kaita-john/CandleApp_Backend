@@ -188,9 +188,9 @@
                     <td>{{ request.celebservice.serviceid.name }}</td>
                     <td>{{ request.state }}</td>
                     <td>{{ request.invoice_id }}</td>
-                    <td>{{ request.amount }}</td>
-                    <td>{{ request.withdraw_amount }}</td>
-                    <td>{{ request.company_amount }}</td>
+                    <td>{{ request.amount|floatformat:2 }}</td>
+                    <td>{{ request.withdraw_amount|floatformat:2 }}</td>
+                    <td>{{ request.company_amount|floatformat:2 }}</td>
                     <td>
                         <div class="dropdown">
                             <button class="dropdown-toggle">Options</button>
