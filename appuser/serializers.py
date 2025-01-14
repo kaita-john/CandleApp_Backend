@@ -63,7 +63,7 @@ class PasswordSerializer(serializers.Serializer):
 
 
 
-class EmailSerializer(serializers.ModelSerializer):
+class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     message = serializers.CharField(required=True)
     title = serializers.CharField(required=True)
