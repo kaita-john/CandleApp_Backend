@@ -289,8 +289,10 @@ class SendEmailCreateView(SchoolIdMixin, generics.CreateAPIView):
 
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
-            title = serializer.validated_data.get('titlep')
+            title = serializer.validated_data.get('title')
             message = serializer.validated_data.get('message')
+
+            print(f"{title}, {email}, {message}")
 
             try:
                 sendMail(sender_email, sender_password, email, title, message)
