@@ -32,6 +32,7 @@ urlpatterns = [
     path('delete-account', deleteAccount, name="deleteaccountpage"),
     path('safety', childSafety, name="childsafety"),
     path('notification', SendPushNotificationView.as_view(), name="roles-list"),
+    path('send-email', SendEmailCreateView.as_view(), name="send-email"),
     path('register', AppUserCreateView.as_view(), name='register'),
     path('login', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('reset-password', PasswordUPdateView.as_view(), name='reset-password'),

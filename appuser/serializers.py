@@ -1,7 +1,5 @@
 from django.contrib.auth.models import Group
-from django.forms import CharField
 from rest_framework import serializers
-
 from appuser.models import AppUser
 
 
@@ -60,3 +58,12 @@ class FeedbackSerializer(serializers.Serializer):
 class PasswordSerializer(serializers.Serializer):
     password = serializers.CharField(required=False, allow_blank=True)
     email = serializers.CharField(required=True)
+
+
+
+
+
+class EmailSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    message = serializers.CharField(required=True)
+    title = serializers.CharField(required=True)

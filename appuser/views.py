@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import requests
 from allauth.account.views import logout
 from django.contrib import messages
@@ -17,8 +19,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from appuser.models import AppUser  # Import your custom user model
-from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer, PasswordSerializer
+from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer, PasswordSerializer, \
+    EmailSerializer
 from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL
+from request.models import Request
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail, generate_random_password
 
 
@@ -273,3 +277,27 @@ class PasswordUPdateView(generics.CreateAPIView):
         sendMail(sender_email, sender_password, email, "PASSWORD CHANGE", message)
 
         return Response({"details": response},status=status.HTTP_200_OK)
+
+
+
+class SendEmailCreateView(SchoolIdMixin, generics.CreateAPIView):
+    serializer_class = EmailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            title = serializer.validated_data.get('titlep')
+            message = serializer.validated_data.get('message')
+
+            try:
+                sendMail(sender_email, sender_password, email, title, message)
+            except Exception as e:
+                pass
+            return Response({"details": "Hurray! Your request was created successfully, and an email has been sent!"},status=status.HTTP_201_CREATED)
+
+        else:
+            # Return 400 response for invalid data
+            return Response({"details": serializer.errors},status=status.HTTP_400_BAD_REQUEST)
