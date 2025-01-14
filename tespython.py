@@ -1,3 +1,6 @@
+from decimal import Decimal, ROUND_DOWN
+
+
 def transform_phone_number(phone_number):
     phonenumber = str(phone_number)
     print(f"Trying ", phonenumber)
@@ -15,7 +18,8 @@ def transform_phone_number(phone_number):
 
 
 
-
+def round_to_2dp(value):
+    return value.quantize(Decimal('0.01'), rounding=ROUND_DOWN)
 
 
 

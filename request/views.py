@@ -19,6 +19,7 @@ from celebservice.models import CelebService
 from constants import sender_email, sender_password, token, publishable_key, COMPANYID, COMPANY_EMAIL, COMPANYAMOUNT, \
     WITHDRAWREQUEST
 from mpesainvoices.models import MpesaInvoice
+from tespython import round_to_2dp
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, IsAdminOrSuperUser, DefaultMixin, sendMail
 from .models import Request
 from .serializers import RequestSerializer
@@ -38,8 +39,8 @@ class RequestCreateView(SchoolIdMixin, generics.CreateAPIView):
                 return Response({"details": "Request with this invoice already exists."},status=status.HTTP_200_OK)
 
             amount = Decimal(serializer.validated_data.get('amount'))
-            company_amount = amount * COMPANYAMOUNT
-            withdraw_amount = amount - company_amount
+            company_amount = round_to_2dp(amount * COMPANYAMOUNT)
+            withdraw_amount = round_to_2dp(amount - company_amount)
 
             serializer.validated_data['companyamount'] = company_amount
             serializer.validated_data['clientamount'] = withdraw_amount
@@ -258,7 +259,7 @@ class CustomerRequestsView(APIView):
 
             response_data = []
             for payment in serializer.data:
-                payment["withdraw_amount"] = payment.clientamount
+                payment["withdraw_amount"] = payment.get("clientamount")
                 response_data.append(payment)
 
             # Append totals to the response
