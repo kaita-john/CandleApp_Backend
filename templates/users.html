@@ -137,7 +137,8 @@
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px;">
             <h4 style="color: black; margin: 0;" id="texted">All Users</h4>
             <div style="flex-grow: 1; max-width: 500px; margin-left: 10px;">
-                <input type="text" id="searchInput" placeholder="Search all users..." onkeyup="filterTable()"  class="search-input" style="width: 100%; padding: 5px;">
+                <input type="text" id="searchInput" placeholder="Search all users..." onkeyup="filterTable()"
+                       class="search-input" style="width: 100%; padding: 5px;">
             </div>
         </div>
 
@@ -155,68 +156,79 @@
 
 
         <!-- Users Table -->
-        <table id="usersTable">
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Phone</th>
-                <th>Gender</th>
-                <th>StageName</th>
-                <th>Role</th>
-                <th>Bio</th>
-
-                <th>Options</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for user in users %}
-                <tr data-role="{% if user.is_celeb %}celeb{% else %}client{% endif %}"
-                    data-approval="{% if user.is_admin %}unapproved{% else %}approved{% endif %}">
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ user.first_name }} {{ user.last_name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{% if user.is_active %}Active{% else %}Inactive{% endif %}</td>
-                    <td>{{ user.phone }}</td>
-                    <td>{{ user.gender }}</td>
-                    <td>{{ user.stagename }}</td>
-                    <td>
-                        {% if user.is_celeb %}
-                            Celeb
-                        {% else %}
-                            Client
-                        {% endif %}
-                    </td>
-                    <td>{{ user.biotext }}</td>
-                    <td>
-                        <div class="dropdown">
-                            <button class="dropdown-toggle">Options</button>
-                            <div class="dropdown-menu">
-                                <a href="{% url 'delete_user' user.id %}" class="dropdown-item"
-                                   onclick="return confirm(`Are you sure you want to delete this user? {{ user.first_name }} {{ user.last_name }}`)">Delete
-                                    User</a>
-                                <a href="{% url 'deactivate_user' user.id %}" class="dropdown-item"
-                                   onclick="return confirm('Are you sure you want to deactivate this user? {{ user.first_name }} {{ user.last_name }}')">Deactivate
-                                    User</a>
-                                {% if user.is_admin %}
-                                    <a href="{% url 'approve_celeb' user.id %}" class="dropdown-item"
-                                       onclick="return confirm('Are you sure you want to approve this celeb? {{ user.first_name }} {{ user.last_name }}')">Approve
-                                        Celeb</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            {% empty %}
+        <!-- Users Table -->
+        <div style="overflow-x:auto; width:100%;">
+            <table id="usersTable" style="width:100%; border-collapse: collapse;">
+                <thead>
                 <tr>
-                    <td colspan="9">No users found.</td>
+                    <th style="padding: 8px; border: 1px solid #ddd;">#</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Name</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Email</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Status</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Phone</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Gender</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">StageName</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Role</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Bio</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Options</th>
                 </tr>
-            {% endfor %}
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr
+                            data-role="{% if user.is_celeb %}celeb{% else %}client{% endif %}"
+                            data-approval="{% if user.is_admin %}unapproved{% else %}approved{% endif %}">
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ forloop.counter }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ user.first_name }} {{ user.last_name }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ user.email }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{% if user.is_active %}Active{% else %}
+                            Inactive{% endif %}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ user.phone }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ user.gender }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ user.stagename }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">
+                            {% if user.is_celeb %}
+                                Celeb
+                            {% else %}
+                                Client
+                            {% endif %}
+                        </td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ user.biotext }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">
+                            <div style="position: relative;">
+                                <button style="padding: 4px 8px; background-color: #007bff; color: white; border: none; cursor: pointer;">
+                                    Options
+                                </button>
+                                <div style="display: none; position: absolute; background: white; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); z-index: 1;">
+                                    <a href="{% url 'delete_user' user.id %}"
+                                       style="padding: 8px; display: block; color: #333; text-decoration: none;"
+                                       onclick="return confirm(`Are you sure you want to delete this user? {{ user.first_name }} {{ user.last_name }}`)">Delete
+                                        User</a>
+                                    <a href="{% url 'deactivate_user' user.id %}"
+                                       style="padding: 8px; display: block; color: #333; text-decoration: none;"
+                                       onclick="return confirm('Are you sure you want to deactivate this user? {{ user.first_name }} {{ user.last_name }}')">Deactivate
+                                        User</a>
+                                    {% if user.is_admin %}
+                                        <a href="{% url 'approve_celeb' user.id %}"
+                                           style="padding: 8px; display: block; color: #333; text-decoration: none;"
+                                           onclick="return confirm('Are you sure you want to approve this celeb? {{ user.first_name }} {{ user.last_name }}')">Approve
+                                            Celeb</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding: 8px; border: 1px solid #ddd;">No users
+                            found.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-            </tbody>
-        </table>
 
     </div>
 
