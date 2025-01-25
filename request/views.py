@@ -384,7 +384,7 @@ class CustomerWithdraw(APIView):
             notification_view = SendPushNotificationView()
             notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
 
-            return Response({"details": "Operation was successful."}, status=status.HTTP_200_OK)
+            return Response({"details": "Operation was successful. You will receive funds shortly!"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
