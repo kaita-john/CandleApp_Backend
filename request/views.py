@@ -288,11 +288,6 @@ class CustomerWithdraw(APIView):
     def post(self, request, pk):
         try:
             payment = get_object_or_404(Request, id=pk)
-
-            payment.withdraw_request = True
-            payment.state = WITHDRAWREQUEST
-            payment.save()
-
             mobile = payment.celeb.phone
 
             service = APIService(token=token)
@@ -324,6 +319,10 @@ class CustomerWithdraw(APIView):
                     status_code = thestatus.get("status_code")
                     if status_code in final_status_codes:
                         message = final_status_codes[status_code]
+
+                        payment.withdraw_request = True
+                        payment.state = WITHDRAWREQUEST
+                        payment.save()
 
                         payment.state = WITHDRAWN
                         payment.complete_requested_by_celeb = False
