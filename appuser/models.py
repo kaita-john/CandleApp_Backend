@@ -69,9 +69,6 @@ class AppUser(BaseUserModel, AbstractBaseUser, PermissionsMixin):
             celeb_group = Group.objects.get_or_create(name="CELEB")
             self.roles.add(celeb_group)
             self.groups.add(celeb_group)
-            company_message = f"New Celeb Sign Up Requiring Verification"
-            notification_view = SendPushNotificationView()
-            notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
             super().save(*args, **kwargs)
 
     class Meta:

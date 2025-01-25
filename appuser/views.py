@@ -21,7 +21,7 @@ from rest_framework.views import APIView
 from appuser.models import AppUser  # Import your custom user model
 from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer, PasswordSerializer, \
     EmailSerializer
-from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL
+from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL, COMPANYID
 from request.models import Request
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail, generate_random_password
 
@@ -98,6 +98,9 @@ class AppUserCreateView(generics.CreateAPIView):
                 celeb_group, created = Group.objects.get_or_create(name="CELEB")  # Get or create CELEB group
                 user.roles.add(celeb_group)
                 user.groups.add(celeb_group)
+                company_message = f"New Celeb Sign Up Requiring Verification"
+                notification_view = SendPushNotificationView()
+                notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
                 user.save()
             return user
 
