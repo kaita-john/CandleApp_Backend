@@ -284,6 +284,71 @@ class CustomerRequestsView(APIView):
             return Response({"error": "Request not found for the given customer ID."}, status=status.HTTP_404_NOT_FOUND)
 
 
+# class CustomerWithdraw(APIView):
+#     def post(self, request, pk):
+#         try:
+#             payment = get_object_or_404(Request, id=pk)
+#             mobile = payment.celeb.phone
+#
+#             service = APIService(token=token)
+#             transactions = [
+#                 {
+#                     'name': payment.celeb.stagename,
+#                     'account': mobile,
+#                     'amount': int(payment.clientamount)
+#                 }
+#             ]
+#             requires_approval = 'NO'
+#             response = service.transfer.mpesa(currency='KES', transactions=transactions, requires_approval=requires_approval)
+#             print(response)
+#             save_mpesa_transfer(response, payment.celeb)
+#
+#             tracking_id = response['tracking_id']
+#             if tracking_id and tracking_id != "":
+#                 final_status_codes = {
+#                     "BF102": "Request Failed",
+#                     "BC100": "Your Transfer Has Been Completed. You will receive funds soon.",
+#                     "BF107": "Failed. Float Check Issue",
+#                     "BF105": "Failed Checking Float Balance",
+#                     "BE111": "Request Ended Or Canceled Early."
+#                 }
+#                 service = APIService(token=token, private_key=publishable_key)
+#
+#                 while True:
+#                     thestatus = service.transfer.status(tracking_id)
+#
+#                     payment.withdraw_request = True
+#                     payment.state = WITHDRAWREQUEST
+#                     payment.save()
+#
+#                     print(f"Current Status: {thestatus}")
+#                     status_code = thestatus.get("status_code")
+#                     if status_code in final_status_codes:
+#                         message = final_status_codes[status_code]
+#
+#                         payment.state = WITHDRAWN
+#                         payment.complete_requested_by_celeb = False
+#                         payment.withdraw_request = False
+#                         payment.withdrawn = True
+#                         payment.withdrawn_date = timezone.now()
+#                         payment.save()
+#
+#                         themessage = "Withdrawal Done"
+#                         # sendMail(sender_email, sender_password, payment.celeb.email, "WITHDRAWAL DONE", themessage)
+#                         company_message = f"Withdrawal Done By {payment.celeb.stagename}"
+#                         # sendMail(sender_email, sender_password, COMPANY_EMAIL, "WITHDRAWAL REQUEST", company_message)
+#                         notification_view = SendPushNotificationView()
+#                         notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
+#
+#                         return Response({"details": message}, status=status.HTTP_200_OK)
+#                     time.sleep(0.5)
+#
+#
+#             return Response({"details": "Withdrawal request successfully submitted."}, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class CustomerWithdraw(APIView):
     def post(self, request, pk):
         try:
@@ -303,47 +368,23 @@ class CustomerWithdraw(APIView):
             print(response)
             save_mpesa_transfer(response, payment.celeb)
 
-            tracking_id = response['tracking_id']
-            if tracking_id and tracking_id != "":
-                final_status_codes = {
-                    "BF102": "Request Failed",
-                    "BC100": "Your Transfer Has Been Completed. You will receive funds soon.",
-                    "BF107": "Failed. Float Check Issue",
-                    "BF105": "Failed Checking Float Balance",
-                    "BE111": "Request Ended Or Canceled Early."
-                }
-                service = APIService(token=token, private_key=publishable_key)
-                while True:
-                    thestatus = service.transfer.status(tracking_id)
+            payment.withdraw_request = True
+            payment.state = WITHDRAWREQUEST
+            payment.save()
 
-                    payment.withdraw_request = True
-                    payment.state = WITHDRAWREQUEST
-                    payment.save()
+            payment.state = WITHDRAWN
+            payment.complete_requested_by_celeb = False
+            payment.withdraw_request = False
+            payment.withdrawn = True
+            payment.withdrawn_date = timezone.now()
+            payment.save()
 
-                    print(f"Current Status: {thestatus}")
-                    status_code = thestatus.get("status_code")
-                    if status_code in final_status_codes:
-                        message = final_status_codes[status_code]
+            themessage = "Withdrawal Done"
+            company_message = f"Withdrawal Done By {payment.celeb.stagename}"
+            notification_view = SendPushNotificationView()
+            notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
 
-                        payment.state = WITHDRAWN
-                        payment.complete_requested_by_celeb = False
-                        payment.withdraw_request = False
-                        payment.withdrawn = True
-                        payment.withdrawn_date = timezone.now()
-                        payment.save()
-
-                        themessage = "Withdrawal Done"
-                        # sendMail(sender_email, sender_password, payment.celeb.email, "WITHDRAWAL DONE", themessage)
-                        company_message = f"Withdrawal Done By {payment.celeb.stagename}"
-                        # sendMail(sender_email, sender_password, COMPANY_EMAIL, "WITHDRAWAL REQUEST", company_message)
-                        notification_view = SendPushNotificationView()
-                        notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
-
-                        return Response({"details": message}, status=status.HTTP_200_OK)
-                    time.sleep(0.5)
-
-
-            return Response({"details": "Withdrawal request successfully submitted."}, status=status.HTTP_200_OK)
+            return Response({"details": "Operation was successful."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
