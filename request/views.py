@@ -3,6 +3,7 @@ import time
 from decimal import Decimal
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -23,7 +24,7 @@ from constants import sender_email, sender_password, token, publishable_key, COM
 from mpesainvoices.models import MpesaInvoice
 from tespython import round_to_2dp, save_mpesa_transfer
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, IsAdminOrSuperUser, DefaultMixin, sendMail
-from .models import Request
+from .models import Request, WithdrawMpesaPaymentTransaction, MpesaTransfer
 from .serializers import RequestSerializer
 
 
@@ -324,9 +325,9 @@ class CustomerWithdraw(APIView):
                     if status_code in final_status_codes:
                         message = final_status_codes[status_code]
                         themessage = "Withdrawal Done"
-                        sendMail(sender_email, sender_password, payment.celeb.email, "WITHDRAWAL DONE", themessage)
+                        # sendMail(sender_email, sender_password, payment.celeb.email, "WITHDRAWAL DONE", themessage)
                         company_message = f"Withdrawal Done By {payment.celeb.stagename}"
-                        sendMail(sender_email, sender_password, COMPANY_EMAIL, "WITHDRAWAL REQUEST", company_message)
+                        # sendMail(sender_email, sender_password, COMPANY_EMAIL, "WITHDRAWAL REQUEST", company_message)
                         notification_view = SendPushNotificationView()
                         notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
 
@@ -349,29 +350,10 @@ class CustomerWithdraw(APIView):
 class PayMe(APIView):
     def post(self, request):
         try:
-
-
-
-
-            tracking_id = response['tracking_id']
-            if tracking_id and tracking_id != "":
-                final_status_codes = {
-                    "BF102": "Request Failed",
-                    "BC100": "Your Transfer Has Been Completed. You will receive funds soon.",
-                    "BF107": "Failed. Float Check Issue",
-                    "BF105": "Failed Checking Float Balance",
-                    "BE111": "Request Ended Or Canceled Early."
-                }
-                service = APIService(token=token, private_key=publishable_key)
-                while True:
-                    thestatus = service.transfer.status(tracking_id)
-                    print(f"Current Status: {thestatus}")
-                    status_code = thestatus.get("status_code")
-                    if status_code in final_status_codes:
-                        message = final_status_codes[status_code]
-                        return Response({"details": message}, status=status.HTTP_200_OK)
-                    time.sleep(1)
-
-            return Response({"details": "Withdrawal request successfully submitted."}, status=status.HTTP_200_OK)
+            with connection.cursor() as cursor:
+                # Force delete all rows from the tables
+                cursor.execute("DELETE FROM request_withdrawmpesapaymenttransaction;")
+                cursor.execute("DELETE FROM request_mpesatransfer;")
+            return Response({"details": "Deleted All"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
