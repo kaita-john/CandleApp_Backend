@@ -299,7 +299,7 @@ class CustomerWithdraw(APIView):
                 {
                     'name': payment.celeb.stagename,
                     'account': mobile,
-                    'amount': payment.clientamount
+                    'amount': int(payment.clientamount)
                 }
             ]
             requires_approval = 'NO'
