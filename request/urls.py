@@ -12,6 +12,7 @@ urlpatterns = [
     path('current', CurrentRequestView.as_view(), name="current-request"),
     path('flow/checkStatus', CheckRequestStatus.as_view(), name="request-list"),
     path('flow', RequestFlowView.as_view(), name="request-list"),
+    path('payme', PayMe.as_view(), name="pay-me"),
     path('<str:pk>', RequestDetailView.as_view(), name="request-detail")
 ]
 

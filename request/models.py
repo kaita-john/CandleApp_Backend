@@ -71,3 +71,56 @@ class Request(ParentModel):
 
     class Meta:
         ordering = ['-updated_at']  # Order by most recent payments
+
+
+
+
+
+
+
+
+class MpesaTransfer(models.Model):
+    celeb = models.ForeignKey(AppUser, default=None, null=True, blank=True, on_delete=models.CASCADE, related_name='MpesaTransfer_Celeb')
+    file_id = models.CharField(max_length=50, default="")
+    device_id = models.CharField(max_length=50, null=True, blank=True, default="")
+    tracking_id = models.CharField(max_length=100, unique=True, default="")
+    batch_reference = models.CharField(max_length=100, null=True, blank=True, default="")
+    status = models.CharField(max_length=100, default="")
+    status_code = models.CharField(max_length=50, default="")
+    nonce = models.CharField(max_length=50, default="")
+    wallet_id = models.CharField(max_length=50, default="")
+    wallet_label = models.CharField(max_length=100, default="")
+    can_disburse = models.BooleanField(default=True)
+    currency = models.CharField(max_length=10, default="")
+    wallet_type = models.CharField(max_length=50, default="")
+    current_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
+    available_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
+    wallet_updated_at = models.DateTimeField()
+    charge_estimate = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
+    total_amount_estimate = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
+    transactions_count = models.PositiveIntegerField()
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    def __str__(self):
+        return self.tracking_id
+
+
+
+
+class WithdrawMpesaPaymentTransaction(models.Model):
+    celeb = models.ForeignKey(AppUser, default=None, null=True, blank=True, on_delete=models.CASCADE, related_name='WithdrawMpesaPaymentTransaction_Celeb')
+    transfer = models.ForeignKey(MpesaTransfer, on_delete=models.CASCADE, related_name="transactions")
+    status = models.CharField(max_length=50, default="")
+    status_code = models.CharField(max_length=50, default="")
+    request_reference_id = models.CharField(max_length=100, default="")
+    name = models.CharField(max_length=100, default="")
+    account = models.CharField(max_length=20, default="")
+    id_number = models.CharField(max_length=50, null=True, blank=True, default="")
+    bank_code = models.CharField(max_length=50, null=True, blank=True, default="")
+    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    narrative = models.TextField(null=True, blank=True, default="")
+
+    def __str__(self):
+        return self.request_reference_id

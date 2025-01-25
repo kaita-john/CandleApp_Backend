@@ -1,10 +1,12 @@
 # Create your views here.
+import time
 from decimal import Decimal
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from intasend import APIService
 from rest_framework import generics
 from rest_framework import status
@@ -17,9 +19,9 @@ from appuser.models import AppUser
 from appuser.views import SendPushNotificationView
 from celebservice.models import CelebService
 from constants import sender_email, sender_password, token, publishable_key, COMPANYID, COMPANY_EMAIL, COMPANYAMOUNT, \
-    WITHDRAWREQUEST
+    WITHDRAWREQUEST, WITHDRAWN
 from mpesainvoices.models import MpesaInvoice
-from tespython import round_to_2dp
+from tespython import round_to_2dp, save_mpesa_transfer
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, IsAdminOrSuperUser, DefaultMixin, sendMail
 from .models import Request
 from .serializers import RequestSerializer
@@ -36,7 +38,7 @@ class RequestCreateView(SchoolIdMixin, generics.CreateAPIView):
             invoice_id = serializer.validated_data.get('invoice_id')
             existing_payment = Request.objects.filter(invoice_id=invoice_id).first()
             if existing_payment:
-                return Response({"details": "Request with this invoice already exists."},status=status.HTTP_200_OK)
+                return Response({"details": "Request with this invoice already exists."}, status=status.HTTP_200_OK)
 
             amount = Decimal(serializer.validated_data.get('amount'))
             company_amount = round_to_2dp(amount * COMPANYAMOUNT)
@@ -46,10 +48,12 @@ class RequestCreateView(SchoolIdMixin, generics.CreateAPIView):
             serializer.validated_data['clientamount'] = withdraw_amount
 
             self.perform_create(serializer)
-            return Response({"details": "Hurray! You can now get in touch anytime. Simply open Requests Page and tap this request anytime you are ready."},status=status.HTTP_201_CREATED)
+            return Response({
+                                "details": "Hurray! You can now get in touch anytime. Simply open Requests Page and tap this request anytime you are ready."},
+                            status=status.HTTP_201_CREATED)
         else:
             # Return 400 response for invalid data
-            return Response({"details": serializer.errors},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
@@ -81,13 +85,11 @@ class RequestListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
             else:
                 if status and status != "" and status != "null":
                     if status == "RESCHEDULE" or status == "RESCHEDULED":
-                        queryset = queryset.filter(client_Reschedule_Request = True)
+                        queryset = queryset.filter(client_Reschedule_Request=True)
                     else:
                         queryset = queryset.filter(state=status)
 
-
         return queryset
-
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -95,7 +97,6 @@ class RequestListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
             return JsonResponse([], status=200, safe=False)
         serializer = self.get_serializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)
-
 
 
 class RequestDetailView(SchoolIdMixin, generics.RetrieveUpdateDestroyAPIView):
@@ -130,9 +131,9 @@ class RequestDetailView(SchoolIdMixin, generics.RetrieveUpdateDestroyAPIView):
         return Response({'details': 'Record deleted successfully'}, status=status.HTTP_200_OK)
 
 
-
 class CurrentRequestView(APIView, DefaultMixin, SchoolIdMixin):
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
+
     def get(self, request):
         school_id = self.check_school_id(request)
         if not school_id:
@@ -140,7 +141,7 @@ class CurrentRequestView(APIView, DefaultMixin, SchoolIdMixin):
         self.check_defaults(self.request, school_id)
 
         try:
-            student = Request.objects.get(is_current=True, school_id = school_id)
+            student = Request.objects.get(is_current=True, school_id=school_id)
             serializer = RequestSerializer(student, many=False)
         except ObjectDoesNotExist:
             return Response({'details': f"Current term not set for shool"}, status=status.HTTP_400_BAD_REQUEST)
@@ -150,6 +151,7 @@ class CurrentRequestView(APIView, DefaultMixin, SchoolIdMixin):
 
 class RequestFlowView(APIView, DefaultMixin, SchoolIdMixin):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
 
         narrative = request.data.get("narrative", "Purchase")  # Optional parameter
@@ -173,7 +175,8 @@ class RequestFlowView(APIView, DefaultMixin, SchoolIdMixin):
 
         # Validate required parameters
         if missing_params:
-            return Response({"details": f"Missing required parameters: {', '.join(missing_params)}"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"details": f"Missing required parameters: {', '.join(missing_params)}"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         client = AppUser.objects.get(id=client)
         if client is None:
@@ -184,7 +187,7 @@ class RequestFlowView(APIView, DefaultMixin, SchoolIdMixin):
 
         try:
             service = APIService(token=token, publishable_key=publishable_key, test=False)
-            #Trigger the Mpesa STK Push
+            # Trigger the Mpesa STK Push
             response = service.collect.mpesa_stk_push(
                 phone_number=int(mobile),
                 email=email,
@@ -193,13 +196,15 @@ class RequestFlowView(APIView, DefaultMixin, SchoolIdMixin):
             )
 
             invoice = response.get("invoice", {})
-            if not invoice : return Response({"detail": "Invoice not found in the response."},status=status.HTTP_404_NOT_FOUND,)
+            if not invoice: return Response({"detail": "Invoice not found in the response."},
+                                            status=status.HTTP_404_NOT_FOUND, )
 
             existing_invoice = MpesaInvoice.objects.filter(invoice=invoice.get("invoice_id")).first()
             if existing_invoice:
                 return Response({"detail": "Invoice already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
-            MpesaInvoice.objects.create(celebservice=celebservice,client=client,invoice=invoice.get("invoice_id", "None"))
+            MpesaInvoice.objects.create(celebservice=celebservice, client=client,
+                                        invoice=invoice.get("invoice_id", "None"))
 
             return Response(response, status=status.HTTP_200_OK)
 
@@ -208,13 +213,13 @@ class RequestFlowView(APIView, DefaultMixin, SchoolIdMixin):
             return Response({"details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class CheckRequestStatus(APIView, DefaultMixin, SchoolIdMixin):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         invoice_id = request.query_params.get("invoice_id")
         if not invoice_id:
-            return Response({"details": f"Missing required parameters: Invoice ID"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"details": f"Missing required parameters: Invoice ID"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             service = APIService(token=token, publishable_key=publishable_key, test=False)
@@ -233,8 +238,6 @@ class CheckRequestStatus(APIView, DefaultMixin, SchoolIdMixin):
             return Response({"details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
 class CustomerRequestsView(APIView):
     def get(self, request, customer_id=None, celeb_id=None):
         try:
@@ -250,11 +253,13 @@ class CustomerRequestsView(APIView):
             serializer = RequestSerializer(payments, many=True)
 
             admin_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(COMPANYAMOUNT)
-            admin_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(COMPANYAMOUNT)
+            admin_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(
+                0)) * Decimal(COMPANYAMOUNT)
             admin_total_withdrawable = admin_total_paid - admin_total_withdrawn
 
             customer_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) - admin_total_paid
-            customer_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) - admin_total_withdrawn
+            customer_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))[
+                                            'amount__sum'] or Decimal(0)) - admin_total_withdrawn
             customer_total_withdrawable = customer_total_paid - customer_total_withdrawn
 
             response_data = []
@@ -278,30 +283,95 @@ class CustomerRequestsView(APIView):
             return Response({"error": "Request not found for the given customer ID."}, status=status.HTTP_404_NOT_FOUND)
 
 
-
-
-
-
 class CustomerWithdraw(APIView):
     def post(self, request, pk):
         try:
             payment = get_object_or_404(Request, id=pk)
-            if payment.withdraw_request:
-                return Response({"message": "Withdrawal request already submitted."},status=status.HTTP_400_BAD_REQUEST)
+
             payment.withdraw_request = True
             payment.state = WITHDRAWREQUEST
             payment.save()
 
-            message = "We have received a withdrawal request from you and it is being processed right now. This should take no more than a few hours"
-            sendMail(sender_email, sender_password, payment.celeb.email, "WITHDRAWAL REQUEST", message)
+            mobile = payment.celeb.phone
 
-            company_message = f"Withdrawal request from {payment.celeb.stagename}"
-            sendMail(sender_email, sender_password, COMPANY_EMAIL, "WITHDRAWAL REQUEST", company_message)
+            service = APIService(token=token)
+            transactions = [
+                {
+                    'name': payment.celeb.stagename,
+                    'account': mobile,
+                    'amount': payment.clientamount
+                }
+            ]
+            requires_approval = 'NO'
+            response = service.transfer.mpesa(currency='KES', transactions=transactions, requires_approval=requires_approval)
+            print(response)
+            save_mpesa_transfer(response, payment.celeb)
 
-            # Send push notification
-            notification_view = SendPushNotificationView()
-            notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
+            tracking_id = response['tracking_id']
+            if tracking_id and tracking_id != "":
+                final_status_codes = {
+                    "BF102": "Request Failed",
+                    "BC100": "Your Transfer Has Been Completed. You will receive funds soon.",
+                    "BF107": "Failed. Float Check Issue",
+                    "BF105": "Failed Checking Float Balance",
+                    "BE111": "Request Ended Or Canceled Early."
+                }
+                service = APIService(token=token, private_key=publishable_key)
+                while True:
+                    thestatus = service.transfer.status(tracking_id)
+                    print(f"Current Status: {thestatus}")
+                    status_code = thestatus.get("status_code")
+                    if status_code in final_status_codes:
+                        message = final_status_codes[status_code]
+                        themessage = "Withdrawal Done"
+                        sendMail(sender_email, sender_password, payment.celeb.email, "WITHDRAWAL DONE", themessage)
+                        company_message = f"Withdrawal Done By {payment.celeb.stagename}"
+                        sendMail(sender_email, sender_password, COMPANY_EMAIL, "WITHDRAWAL REQUEST", company_message)
+                        notification_view = SendPushNotificationView()
+                        notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
 
-            return Response({"details": "Withdrawal request successfully submitted."},status=status.HTTP_200_OK)
+                        payment.state = WITHDRAWN
+                        payment.complete_requested_by_celeb = False
+                        payment.withdraw_request = False
+                        payment.withdrawn = True
+                        payment.withdrawn_date = timezone.now()
+                        payment.save()
+
+                        return Response({"details": message}, status=status.HTTP_200_OK)
+                    time.sleep(0.5)
+
+
+            return Response({"details": "Withdrawal request successfully submitted."}, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"error": str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PayMe(APIView):
+    def post(self, request):
+        try:
+
+
+
+
+            tracking_id = response['tracking_id']
+            if tracking_id and tracking_id != "":
+                final_status_codes = {
+                    "BF102": "Request Failed",
+                    "BC100": "Your Transfer Has Been Completed. You will receive funds soon.",
+                    "BF107": "Failed. Float Check Issue",
+                    "BF105": "Failed Checking Float Balance",
+                    "BE111": "Request Ended Or Canceled Early."
+                }
+                service = APIService(token=token, private_key=publishable_key)
+                while True:
+                    thestatus = service.transfer.status(tracking_id)
+                    print(f"Current Status: {thestatus}")
+                    status_code = thestatus.get("status_code")
+                    if status_code in final_status_codes:
+                        message = final_status_codes[status_code]
+                        return Response({"details": message}, status=status.HTTP_200_OK)
+                    time.sleep(1)
+
+            return Response({"details": "Withdrawal request successfully submitted."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
