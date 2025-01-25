@@ -324,12 +324,6 @@ class CustomerWithdraw(APIView):
                     status_code = thestatus.get("status_code")
                     if status_code in final_status_codes:
                         message = final_status_codes[status_code]
-                        themessage = "Withdrawal Done"
-                        # sendMail(sender_email, sender_password, payment.celeb.email, "WITHDRAWAL DONE", themessage)
-                        company_message = f"Withdrawal Done By {payment.celeb.stagename}"
-                        # sendMail(sender_email, sender_password, COMPANY_EMAIL, "WITHDRAWAL REQUEST", company_message)
-                        notification_view = SendPushNotificationView()
-                        notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
 
                         payment.state = WITHDRAWN
                         payment.complete_requested_by_celeb = False
@@ -337,6 +331,13 @@ class CustomerWithdraw(APIView):
                         payment.withdrawn = True
                         payment.withdrawn_date = timezone.now()
                         payment.save()
+
+                        themessage = "Withdrawal Done"
+                        # sendMail(sender_email, sender_password, payment.celeb.email, "WITHDRAWAL DONE", themessage)
+                        company_message = f"Withdrawal Done By {payment.celeb.stagename}"
+                        # sendMail(sender_email, sender_password, COMPANY_EMAIL, "WITHDRAWAL REQUEST", company_message)
+                        notification_view = SendPushNotificationView()
+                        notification_view.send_push_notification_by_external_id(COMPANYID, company_message)
 
                         return Response({"details": message}, status=status.HTTP_200_OK)
                     time.sleep(0.5)
