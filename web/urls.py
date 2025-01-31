@@ -4,6 +4,7 @@ import web.views as webviews
 
 urlpatterns = [
     path('homepage/', webviews.homepage_view, name='homepage'),
+    path('terms/', webviews.terms_view, name='terms'),
     path('users/', webviews.users_view, name='userspage'),
     path('delete_user/<path:user_id>/', webviews.delete_user, name='delete_user'),
     path('deactivate_user/<path:user_id>/', webviews.deactivate_user, name='deactivate_user'),

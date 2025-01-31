@@ -168,3 +168,8 @@ def refund_request(request, request_id):
 def custom_logout_view(request):
     logout(request)
     return redirect("loginpage")  # Replace 'homepage' with your desired redirect URL
+
+
+def terms_view(request):
+    return render(request, "termsofservice.html", {})
+
