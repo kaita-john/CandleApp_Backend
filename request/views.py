@@ -240,13 +240,16 @@ class CheckRequestStatus(APIView, DefaultMixin, SchoolIdMixin):
 
 
 class CustomerRequestsView(APIView):
-    def get(self, request, customer_id=None, celeb_id=None):
+    def get(self, request, client_id=None, customer_id=None, celeb_id=None):
         try:
             # Start with a base query
             payments = Request.objects.filter(complete_requested_by_celeb=True).order_by('withdrawn')
 
             if customer_id and customer_id != "null" and customer_id != "":
                 payments = payments.filter(client__id=customer_id)
+
+            if client_id and client_id != "null" and client_id != "":
+                payments = payments.filter(client__id=client_id)
 
             if celeb_id and celeb_id != "null" and celeb_id != "":
                 payments = payments.filter(celeb__id=celeb_id)
