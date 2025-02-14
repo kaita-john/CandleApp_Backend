@@ -91,4 +91,4 @@ ONESIGNAL_API_KEY = "os_v2_app_vpbipjazmbeqhc4pcsas5rxqortm4wnjkapeom5wgq5bf543z
 COMPANY_EMAIL = "starpalglobal@gmail.com"
 COMPANYID = "67f19eda-9564-4b82-94a0-cc6d3080005c"
 
-COMPANYAMOUNT = Decimal(0.50)
+COMPANYAMOUNT = Decimal(0.30)
