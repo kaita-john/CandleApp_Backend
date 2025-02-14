@@ -69,6 +69,8 @@ class RequestListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
         both = self.request.query_params.get('both', None)
         complete_shoutouts = self.request.query_params.get('complete_shoutouts', None)
 
+        print(f"celeb id is present")
+
         if client_id and client_id != "" and client_id != "null":
             queryset = queryset.filter(client__id=client_id)
         if celeb_id and celeb_id != "" and celeb_id != "null":
@@ -242,8 +244,15 @@ class CheckRequestStatus(APIView, DefaultMixin, SchoolIdMixin):
 class CustomerRequestsView(APIView):
     def get(self, request, client_id=None, customer_id=None, celeb_id=None):
         try:
+
+            celeb_id = request.GET.get("celeb_id")
+            customer_id = request.GET.get("customer_id")
+            client_id = request.GET.get("client_id")
             # Start with a base query
             payments = Request.objects.filter(complete_requested_by_celeb=True).order_by('withdrawn')
+
+            print("1111")
+            print(celeb_id)
 
             if customer_id and customer_id != "null" and customer_id != "":
                 payments = payments.filter(client__id=customer_id)
@@ -252,18 +261,17 @@ class CustomerRequestsView(APIView):
                 payments = payments.filter(client__id=client_id)
 
             if celeb_id and celeb_id != "null" and celeb_id != "":
+                print("2222")
                 payments = payments.filter(celeb__id=celeb_id)
 
             serializer = RequestSerializer(payments, many=True)
 
             admin_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(COMPANYAMOUNT)
-            admin_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(
-                0)) * Decimal(COMPANYAMOUNT)
+            admin_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) * Decimal(COMPANYAMOUNT)
             admin_total_withdrawable = admin_total_paid - admin_total_withdrawn
 
             customer_total_paid = (payments.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) - admin_total_paid
-            customer_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))[
-                                            'amount__sum'] or Decimal(0)) - admin_total_withdrawn
+            customer_total_withdrawn = (payments.filter(withdrawn=True).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)) - admin_total_withdrawn
             customer_total_withdrawable = customer_total_paid - customer_total_withdrawn
 
             response_data = []

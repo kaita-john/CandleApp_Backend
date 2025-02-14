@@ -54,27 +54,30 @@ STATUS = [
 group_names = ['CLIENT', 'CELEB']
 GENDER_CHOICES = [
     ('MALE', 'Male'),
-    ('FEMALE', 'Female'),
+    ('FEMALE', 'Female')
 ]
+
+
+
+SCHEDULED = 'SCHEDULED'
+RESCHEDULED = 'RESCHEDULED'
+
 
 PENDING = 'PENDING'
 CANCELED = 'CANCELED'
 COMPLETED = 'COMPLETED'
-SCHEDULED = 'SCHEDULED'
-RESCHEDULED = 'RESCHEDULED'
-DONEREQUESTED = 'DONEREQUESTED'
 WITHDRAWREQUEST = 'WITHDRAWREQUEST'
 WITHDRAWN = 'WITHDRAWN'
+
 
 STATE_CHOICES = [
     (PENDING, 'Pending'),
     (CANCELED, 'Canceled'),
-    (RESCHEDULED, 'Rescheduled'),
-    (SCHEDULED, 'Scheduled'),
     (COMPLETED, 'Completed'),
-    (DONEREQUESTED, 'Donerequested'),
     (WITHDRAWREQUEST, 'Withdrawrequest'),
     (WITHDRAWN, 'Withdrawn'),
+    (RESCHEDULED, 'Rescheduled'),
+    (SCHEDULED, 'Scheduled'),
 ]
 
 sender_email = "kaitaformal@gmail.com"
