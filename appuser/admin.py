@@ -14,7 +14,7 @@ class AppUserAdmin(admin.ModelAdmin):
     list_filter = ('is_active', 'is_celeb', 'is_staff')
     fieldsets = (
         ('Personal Info', {
-            'fields': ('first_name', 'last_name', 'email', 'phone', 'gender', 'location', 'stagename', 'tagline', 'biotext', 'image' , 'instagram_page', 'facebook_page', 'youtube_page', 'other_page'),
+            'fields': ('first_name', 'last_name', 'email', 'phone', 'gender', 'location', 'stagename', 'tagline', 'biotext', 'image' , 'tiktok_page', 'instagram_page', 'facebook_page', 'youtube_page', 'other_page'),
         }),
         ('Permissions', {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'is_celeb', 'roles', 'groups'),
