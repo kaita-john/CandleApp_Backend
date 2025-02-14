@@ -45,6 +45,13 @@ class AppUser(BaseUserModel, AbstractBaseUser, PermissionsMixin):
     stagename = models.CharField(max_length=255, blank=True, null=True, default = "")
     image = models.CharField(max_length=255, blank=True, null=True, default = "")
 
+    tiktok_page = models.CharField(max_length=255, blank=True, null=True, default="")
+    instagram_page = models.CharField(max_length=255, blank=True, null=True, default="")
+    facebook_page = models.CharField(max_length=255, blank=True, null=True, default="")
+    youtube_page = models.CharField(max_length=255, blank=True, null=True, default="")
+    other_page = models.CharField(max_length=255, blank=True, null=True, default="")
+
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
