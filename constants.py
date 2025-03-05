@@ -88,7 +88,7 @@ publishable_key = "ISPubKey_live_f27f98fc-a2c0-4e55-a035-5e4f8ed321c0"
 
 ONESIGNAL_APP_ID = "abc287a4-1960-4903-8b8f-14812ec6f074"
 ONESIGNAL_API_KEY = "os_v2_app_vpbipjazmbeqhc4pcsas5rxqortm4wnjkapeom5wgq5bf543zbs72wihfrqjwmtu3dupjfbof64yezqdktl4cjsm4jllp2gas32cfly"
-COMPANY_EMAIL = "starpalglobal@gmail.com"
+COMPANY_EMAIL = "appglobal@gmail.com"
 COMPANYID = "67f19eda-9564-4b82-94a0-cc6d3080005c"
 
 COMPANYAMOUNT = Decimal(0.30)

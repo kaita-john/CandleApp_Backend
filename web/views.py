@@ -13,7 +13,6 @@ from django.views.decorators.cache import never_cache
 
 from appuser.models import AppUser
 from constants import COMPANYAMOUNT
-from request.models import Request
 
 
 @never_cache

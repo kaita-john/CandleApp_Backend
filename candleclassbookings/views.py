@@ -1,39 +1,35 @@
 # Create your views here.
 from django.http import JsonResponse
-from rest_framework import generics, status
+from rest_framework import generics
+from rest_framework import status
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from utils import SchoolIdMixin, UUID_from_PrimaryKey, DefaultMixin
-from .models import MpesaInvoice
-from .serializers import MpesaInvoiceSerializer
+from utils import SchoolIdMixin, DefaultMixin
+from .models import CandleClassBooking
+from .serializers import CandleClassBookingSerializer
 
 
-class MpesaInvoiceCreateView(SchoolIdMixin, generics.CreateAPIView):
-    serializer_class = MpesaInvoiceSerializer
-    permission_classes = [IsAuthenticated]
+class CandleClassBookingCreateView(SchoolIdMixin, generics.CreateAPIView):
+    serializer_class = CandleClassBookingSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-
         if serializer.is_valid():
             self.perform_create(serializer)
-            return Response({'detail': 'MpesaInvoice created successfully'}, status=status.HTTP_201_CREATED)
+            return Response({'detail': 'CandleClassBooking created successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response({'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MpesaInvoiceListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
-    serializer_class = MpesaInvoiceSerializer
-    permission_classes = [IsAuthenticated]
-
+class CandleClassBookingListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
+    serializer_class = CandleClassBookingSerializer
     def get_queryset(self):
-        queryset = MpesaInvoice.objects.all()
-        invoice = self.request.query_params.get('invoice', None)
-        if invoice and invoice != "" and invoice != "null":
-            queryset = queryset.filter(invoice=invoice)
+        queryset = CandleClassBooking.objects.all()
+        celebid = self.request.query_params.get('celebid', None)
+        if celebid and celebid != "" and celebid != "null":
+            queryset = queryset.filter(celebid=celebid)
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -44,17 +40,17 @@ class MpesaInvoiceListView(SchoolIdMixin, DefaultMixin, generics.ListAPIView):
         return JsonResponse(serializer.data, safe=False)
 
 
-class MpesaInvoiceDetailView(SchoolIdMixin, generics.RetrieveUpdateDestroyAPIView):
-    queryset = MpesaInvoice.objects.all()
-    serializer_class = MpesaInvoiceSerializer
-    permission_classes = [IsAuthenticated]
+class CandleClassBookingDetailView(SchoolIdMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = CandleClassBooking.objects.all()
+    serializer_class = CandleClassBookingSerializer
+    # permission_classes = [IsAuthenticated]
 
     def get_object(self):
         primarykey = self.kwargs['pk']
         try:
-            id = UUID_from_PrimaryKey(primarykey)
-            return MpesaInvoice.objects.get(id=id)
-        except (ValueError, MpesaInvoice.DoesNotExist):
+            #id = UUID_from_PrimaryKey(primarykey)
+            return CandleClassBooking.objects.get(id=primarykey)
+        except (ValueError, CandleClassBooking.DoesNotExist):
             raise NotFound({'detail': 'Record Not Found'})
 
     def update(self, request, *args, **kwargs):
@@ -63,7 +59,7 @@ class MpesaInvoiceDetailView(SchoolIdMixin, generics.RetrieveUpdateDestroyAPIVie
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         if serializer.is_valid():
             self.perform_update(serializer)
-            return Response({'detail': 'MpesaInvoice updated successfully'}, status=status.HTTP_201_CREATED)
+            return Response({'detail': 'CandleClassBooking updated successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response({'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -76,9 +72,8 @@ class MpesaInvoiceDetailView(SchoolIdMixin, generics.RetrieveUpdateDestroyAPIVie
         return Response({'detail': 'Record deleted successfully'}, status=status.HTTP_200_OK)
 
 
-class MpesaInvoiceDeleteAllObjects(SchoolIdMixin, APIView):
 
+class CandleClassBookingDeleteAllObjects(SchoolIdMixin, APIView):
     def delete(self, request, *args, **kwargs):
-        deleted_count, _ = MpesaInvoice.objects.all().delete()
-        return Response({'detail': f"{deleted_count} MpesaInvoice objects deleted successfully."},
-                        status=status.HTTP_200_OK)
+        deleted_count, _ = CandleClassBooking.objects.all().delete()
+        return Response({'detail': f"{deleted_count} CandleClassBooking objects deleted successfully."}, status=status.HTTP_200_OK)

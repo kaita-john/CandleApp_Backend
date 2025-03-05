@@ -15,8 +15,8 @@ from rest_framework.authentication import get_authorization_header
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from starpal import settings
-from starpal.settings import SIMPLE_JWT
+from app import settings
+from app.settings import SIMPLE_JWT
 
 
 class BaseUserModel(models.Model):

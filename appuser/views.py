@@ -1,11 +1,7 @@
-from decimal import Decimal
-
 import requests
-from allauth.account.views import logout
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
-from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.translation import gettext as _
@@ -22,7 +18,6 @@ from appuser.models import AppUser  # Import your custom user model
 from appuser.serializers import AppUserSerializer, PushNotificationSerializer, FeedbackSerializer, PasswordSerializer, \
     EmailSerializer
 from constants import ONESIGNAL_API_KEY, ONESIGNAL_APP_ID, sender_email, sender_password, COMPANY_EMAIL, COMPANYID
-from request.models import Request
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, sendMail, generate_random_password
 
 
