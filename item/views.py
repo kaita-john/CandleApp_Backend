@@ -1,14 +1,17 @@
 # Create your views here.
+import json
+
 from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import NotFound
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from itemimages.models import ItemImage
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, DefaultMixin
-from .models import Item
+from .models import Item, StockNotification
 from .serializers import ItemSerializer
 
 
@@ -89,3 +92,49 @@ class ItemDeleteAllObjects(SchoolIdMixin, APIView):
     def delete(self, request, *args, **kwargs):
         deleted_count, _ = Item.objects.all().delete()
         return Response({'detail': f"{deleted_count} Item objects deleted successfully."}, status=status.HTTP_200_OK)
+
+
+class OutOfStockView(generics.UpdateAPIView):
+    queryset = Item.objects.all()
+    lookup_field = 'id'
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            instance.inStock = False
+            instance.save()
+            return Response({'status': 'success', 'message': 'Item marked as out of stock successfully.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 'error', 'message': f'Error marking item as out of stock: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class RestockView(generics.UpdateAPIView):
+    queryset = Item.objects.all()
+    lookup_field = 'id'
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            instance.inStock = True
+            instance.save()
+            return Response({'status': 'success', 'message': 'Item restocked successfully.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 'error', 'message': f'Error restocking item: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class NotifyOutOfStockView(generics.CreateAPIView):
+    parser_classes = [JSONParser]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            name = data.get('name')
+            email = data.get('email')
+            product_name = data.get('productName')
+
+            if not name or not email or not product_name:
+                return Response({'status': 'error', 'message': 'Name, email, and product name are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            StockNotification.objects.create(name=name, email=email, product_name=product_name)
+            return Response({'status': 'success', 'message': 'Notification request received successfully.'}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'status': 'error', 'message': f'Error processing request: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
