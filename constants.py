@@ -89,7 +89,7 @@ publishable_key = "ISPubKey_live_48453945-adcc-4394-9cbf-98d5d50ad08d"
 
 ONESIGNAL_APP_ID = "abc287a4-1960-4903-8b8f-14812ec6f074"
 ONESIGNAL_API_KEY = "os_v2_app_vpbipjazmbeqhc4pcsas5rxqortm4wnjkapeom5wgq5bf543zbs72wihfrqjwmtu3dupjfbof64yezqdktl4cjsm4jllp2gas32cfly"
-COMPANY_EMAIL = "kaitajohnn@gmail.com"
+COMPANY_EMAIL = "ciomaingicandles@gmail.com"
 COMPANYID = "67f19eda-9564-4b82-94a0-cc6d3080005c"
 
 COMPANYAMOUNT = Decimal(0.30)
