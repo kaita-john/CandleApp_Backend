@@ -83,12 +83,13 @@ STATE_CHOICES = [
 sender_email = "kaitaformal@gmail.com"
 sender_password ="wwmx vsyr tvwp sfac"
 
-token = "ISSecretKey_live_113a3e6d-e2ce-4342-ab6e-16014f6e416c"
-publishable_key = "ISPubKey_live_f27f98fc-a2c0-4e55-a035-5e4f8ed321c0"
+token = "ISSecretKey_live_d7fbfdc8-31f1-40da-9caa-c4bbddc72ab2"
+publishable_key = "ISPubKey_live_48453945-adcc-4394-9cbf-98d5d50ad08d"
+
 
 ONESIGNAL_APP_ID = "abc287a4-1960-4903-8b8f-14812ec6f074"
 ONESIGNAL_API_KEY = "os_v2_app_vpbipjazmbeqhc4pcsas5rxqortm4wnjkapeom5wgq5bf543zbs72wihfrqjwmtu3dupjfbof64yezqdktl4cjsm4jllp2gas32cfly"
-COMPANY_EMAIL = "appglobal@gmail.com"
+COMPANY_EMAIL = "ciomaingicandles@gmail.com"
 COMPANYID = "67f19eda-9564-4b82-94a0-cc6d3080005c"
 
 COMPANYAMOUNT = Decimal(0.30)

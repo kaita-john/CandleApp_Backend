@@ -1,5 +1,6 @@
 # Create your views here.
 import json
+import threading
 
 from django.http import JsonResponse
 from rest_framework import generics
@@ -9,10 +10,13 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from constants import sender_email, sender_password, COMPANY_EMAIL
 from itemimages.models import ItemImage
-from utils import SchoolIdMixin, UUID_from_PrimaryKey, DefaultMixin
+from utils import SchoolIdMixin, UUID_from_PrimaryKey, DefaultMixin, sendMail
 from .models import Item, StockNotification
 from .serializers import ItemSerializer
+from datetime import datetime
+
 
 
 class ItemCreateView(SchoolIdMixin, generics.CreateAPIView):
@@ -132,8 +136,25 @@ class NotifyOutOfStockView(generics.CreateAPIView):
 
             if not name or not email or not product_name:
                 return Response({'status': 'error', 'message': 'Name, email, and product name are required.'}, status=status.HTTP_400_BAD_REQUEST)
-
             StockNotification.objects.create(name=name, email=email, product_name=product_name)
+
+            current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            message = f"""
+            Stock Notification Request:
+
+            Name: {name}
+            Email: {email}
+            Product Name: {product_name}
+            Date: {current_date}
+
+            This user has requested to be notified when the product is back in stock.
+            """
+
+            threading.Thread(
+                target=sendMail,
+                args=(sender_email, sender_password, COMPANY_EMAIL, "New Stock Notification Request", message)
+            ).start()
+
             return Response({'status': 'success', 'message': 'Notification request received successfully.'}, status=status.HTTP_201_CREATED)
 
         except Exception as e:

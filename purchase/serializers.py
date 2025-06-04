@@ -1,15 +1,20 @@
+import json
+import threading
 import time
 
 from django.db import transaction
 from intasend import APIService
+from intasend.exceptions import IntaSendBadRequest
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from constants import token, publishable_key
+from constants import token, publishable_key, sender_email, sender_password, COMPANY_EMAIL
+from item.models import Item
 from mpesainvoices.models import MpesaInvoice
 from purchase.models import Purchase
 from purchaseitem.models import PurchaseItem
 from purchaseitem.serializers import PurchaseItemSerializer
-
+from utils import sendMail
 
 
 class PurchaseSerializer(serializers.ModelSerializer):
@@ -36,12 +41,27 @@ class PurchaseSerializer(serializers.ModelSerializer):
         amount = total_price
 
         service = APIService(token=token, publishable_key=publishable_key, test=False)
-        response = service.collect.mpesa_stk_push(
-            phone_number=int(mobile),
-            email=email,
-            amount=int(amount),
-            narrative="purchase",  # Narrative can be a string literal
-        )
+
+        global response
+        try:
+            response = service.collect.mpesa_stk_push(
+                phone_number=int(mobile),
+                email=email,
+                amount=int(amount),
+                narrative="purchase",  # Narrative can be a string literal
+            )
+        except IntaSendBadRequest as e:
+            try:
+                # Convert string to dict
+                err_detail = json.loads(e.args[0])  # Use e.args[0] instead of str(e)
+                print(err_detail)
+
+                # Collect all error messages (in case there are multiple)
+                error_messages = [err["detail"] for err in err_detail.get("errors", [])]
+                raise ValidationError({"mpesa": error_messages})
+            except Exception as parse_error:
+                print("Error parsing IntaSend error:", parse_error)
+                raise ValidationError({"mpesa": "STK Push failed. Please check phone number format."})
 
         invoice = response.get("invoice", {})
         invoice_id = invoice.get("invoice_id")
@@ -65,14 +85,40 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
             print(f"Current Status: {state}")
 
+            # ✅ Format purchase email message
+            message = (
+                f"🧾 New Purchase Made 🧾\n\n"
+                f"Name: {validated_data.get('fullName')}\n"
+                f"Email: {email}\n"
+                f"Mobile: {mobile}\n"
+                f"Amount: {amount}\n"
+                f"Items:\n"
+            )
+
             if state == "COMPLETED" or state == "COMPLETE":
                 with transaction.atomic(): # Create Purchase only after successful payment
                     purchase = Purchase.objects.create(**validated_data) # Create Purchase here
                     purchase.total_price = total_price
                     purchase.save()
+
                     for item in purchaseitems_data:
                         purchaseItem = PurchaseItem.objects.create(**item)
                         purchase.purchaseitems.add(purchaseItem)
+                        quantity = item['quantity']
+                        price = item['price']
+                        line_total = price * quantity
+                        try:
+                            item_instance = item['item']
+                            item_name = item_instance.name
+                            message += f" - {item_name} (x{quantity}) = KES {line_total}\n"
+                        except Item.DoesNotExist:
+                            item_name = f"Unknown Item (ID {item.id})"
+                            message += f" - {item_name} (x{quantity}) = KES {line_total}\n"
+
+                    message += f"\nTotal: KES {total_price}\n\nPlease check admin panel for more details."
+                    # ✅ Send email in background
+                    threading.Thread(target=sendMail,args=(sender_email, sender_password, COMPANY_EMAIL, "New Purchase Made", message)).start()
+
                 return purchase # Return the Purchase object
             elif state in ["FAILED", "CANCELLED"]:
                 raise serializers.ValidationError({"error": f"Payment {state}. Reason: {failed_reason or 'Unknown'}"}) # Raise exception on failure

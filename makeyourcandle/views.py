@@ -1,4 +1,6 @@
 # Create your views here.
+import threading
+
 from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework import status
@@ -6,7 +8,8 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from utils import SchoolIdMixin, DefaultMixin
+from constants import sender_email, sender_password, COMPANY_EMAIL
+from utils import SchoolIdMixin, DefaultMixin, sendMail
 from .models import MakeYourCandle
 from .serializers import MakeYourCandleSerializer
 
@@ -17,8 +20,28 @@ class MakeYourCandleCreateView(SchoolIdMixin, generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
+            data = serializer.validated_data
             self.perform_create(serializer)
+            message = f"""
+            New MakeYourCandle Order:
+            Purpose: {data.get('purpose')}
+            Quantity: {data.get('quantity')}
+            Scent: {data.get('scent')}
+            Jar Color: {data.get('jar_color')}
+            Special Labeling: {data.get('special_labeling')}
+            Custom Message: {data.get('custom_message')}
+            Delivery Timeline: {data.get('delivery_timeline')}
+            Additional Notes: {data.get('additional_notes')}
+            Email: {data.get('email')}
+            Phone Number: {data.get('phone_number')}
+            """
+            # Send email asynchronously
+            threading.Thread(
+                target=sendMail,
+                args=(sender_email, sender_password, COMPANY_EMAIL, "New MakeYourCandle Order", message)
+            ).start()
             return Response({'detail': 'MakeYourCandle created successfully'}, status=status.HTTP_201_CREATED)
+
         else:
             return Response({'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -1,12 +1,19 @@
 # Create your views here.
+import json
+
 from django.http import JsonResponse
+from intasend import APIService
+from intasend.exceptions import IntaSendBadRequest
 from rest_framework import generics
 from rest_framework import status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from appuser.models import AppUser
+from constants import token, publishable_key
+from mpesainvoices.models import MpesaInvoice
 from utils import SchoolIdMixin, UUID_from_PrimaryKey, DefaultMixin
 from .models import Purchase
 from .serializers import PurchaseSerializer
@@ -78,68 +85,3 @@ class PurchaseDeleteAllObjects(SchoolIdMixin, APIView):
         deleted_count, _ = Purchase.objects.all().delete()
         return Response({'detail': f"{deleted_count} Purchase objects deleted successfully."}, status=status.HTTP_200_OK)
 
-
-
-
-
-class RequestFlowView(APIView, DefaultMixin, SchoolIdMixin):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        narrative = request.data.get("narrative", "Purchase")
-        mobile = request.data.get("mobile")
-        email = request.data.get("email")
-        amount = request.data.get("amount")
-        client = request.data.get("client")
-        celebservice = request.data.get("celebservice")
-
-        missing_params = []
-        if not mobile:
-            missing_params.append("mobile")
-        if not email:
-            missing_params.append("email")
-        if not amount:
-            missing_params.append("amount")
-        if not client:
-            missing_params.append("client")
-        if not celebservice:
-            missing_params.append("celebservice")
-
-        # Validate required parameters
-        if missing_params:
-            return Response({"details": f"Missing required parameters: {', '.join(missing_params)}"},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        client = AppUser.objects.get(id=client)
-        if client is None:
-            return Response({'detail': f"Invalid Client ID"}, status=status.HTTP_400_BAD_REQUEST)
-        celebservice = CelebService.objects.get(id=celebservice)
-        if celebservice is None:
-            return Response({'detail': f"Invalid Celeb Service ID"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            service = APIService(token=token, publishable_key=publishable_key, test=False)
-            # Trigger the Mpesa STK Push
-            response = service.collect.mpesa_stk_push(
-                phone_number=int(mobile),
-                email=email,
-                amount=int(amount),
-                narrative=narrative,
-            )
-
-            invoice = response.get("invoice", {})
-            if not invoice: return Response({"detail": "Invoice not found in the response."},
-                                            status=status.HTTP_404_NOT_FOUND, )
-
-            existing_invoice = MpesaInvoice.objects.filter(invoice=invoice.get("invoice_id")).first()
-            if existing_invoice:
-                return Response({"detail": "Invoice already exists."}, status=status.HTTP_400_BAD_REQUEST)
-
-            MpesaInvoice.objects.create(celebservice=celebservice, client=client,
-                                        invoice=invoice.get("invoice_id", "None"))
-
-            return Response(response, status=status.HTTP_200_OK)
-
-        except Exception as e:
-
-            return Response({"details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

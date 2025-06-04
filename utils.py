@@ -5,6 +5,8 @@ import string
 import time
 import uuid
 from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import jwt
 from django.contrib.auth.models import Group
@@ -27,8 +29,6 @@ class BaseUserModel(models.Model):
 
     class Meta:
         abstract = True
-
-
 
 
 class SchoolIdMixin:
@@ -72,7 +72,9 @@ class IsSuperUser(permissions.BasePermission):
 
 class IsAdminOrSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user and (request.user.is_admin or IsAdminUser().has_permission(request,view) or IsSuperUser().has_permission(request, view))
+        return request.user and (request.user.is_admin or IsAdminUser().has_permission(request,
+                                                                                       view) or IsSuperUser().has_permission(
+            request, view))
 
 
 def fetchAllRoles():
@@ -97,15 +99,35 @@ def fetchusergroups(userid):
         return userroles
 
 
-def sendMail(sender_email, sender_password, receiver_email, subject, usermessage):
+# def sendMail(sender_email, sender_password, receiver_email, subject, usermessage):
+#     try:
+#         message = 'Subject: {}\n\n{}'.format(subject, usermessage)
+#         server = smtplib.SMTP('smtp.gmail.com', 587)
+#         server.starttls()
+#         server.login(sender_email, sender_password)
+#         server.sendmail(sender_email, receiver_email, message)
+#     except Exception as ex:
+#         raise ValidationError({'detail': str(ex)})
+
+
+def sendMail(sender_email, sender_password, receiver_email, subject, body):
     try:
-        message = 'Subject: {}\n\n{}'.format(subject, usermessage)
-        server = smtplib.SMTP('smtp.gmail.com', 587)
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = receiver_email
+        msg["Subject"] = subject
+
+        # Add UTF-8 encoded message
+        msg.attach(MIMEText(body, "plain", "utf-8"))
+
+        server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(sender_email, sender_password)
-        server.sendmail(sender_email, receiver_email, message)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.quit()
+
     except Exception as ex:
-        raise ValidationError({'detail': str(ex)})
+        print("Email sending failed:", ex)
 
 
 def generate_unique_code(prefix="INV"):
@@ -148,12 +170,12 @@ def file_upload(instance, filename):
     return os.path.join(upload_to, filename)
 
 
-
 def currentTerm(school_id):
     try:
-        return Term.objects.get(is_current=True , school_id=school_id)
+        return Term.objects.get(is_current=True, school_id=school_id)
     except Term.DoesNotExist:
         return None
+
 
 def check_if_object_exists(Model, obj_id):
     try:
@@ -161,7 +183,6 @@ def check_if_object_exists(Model, obj_id):
         return True
     except ObjectDoesNotExist:
         return Response({'detail': f"{obj_id} is not a valid uuid"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class DefaultMixin:

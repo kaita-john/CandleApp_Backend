@@ -233,10 +233,8 @@ class FeedbackView(generics.CreateAPIView):
             sendMail(sender_email, sender_password, COMPANY_EMAIL, "FEEDBACK", message)
 
             # Return a success response
-            return Response(
-                {"details": "Thank you for your feedback!"},
-                status=status.HTTP_200_OK
-            )
+            return Response({"details": "Thank you for your feedback!"},status=status.HTTP_200_OK)
+
         except Exception as e:
             # Log the exception (replace with proper logging)
             print(f"Error occurred: {e}")  # For debugging; use a logging library in production
